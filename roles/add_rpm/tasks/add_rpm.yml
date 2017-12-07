@@ -1,13 +1,13 @@
 ---
 - name: Verifying NETCONF - [Step 01]
   wait_for: 
-#    host: "{{ ansible_ssh_host }}" 
+    host: "{{ ansible_ssh_host }}" 
     port: 830
 
 - name: Add RPM - [Step 02]
   junos_install_config:
     file: "{{ role_path }}/files/rpm.conf"
-#    host: "{{ ansible_ssh_host }}"    # variable is from inventory file
-#    user: "{{ juniper_user }}"        # variable is from inventory file
-#    passwd: "{{ juniper_passwd }}"    # variable is from inventory file
+    host: "{{ ansible_ssh_host }}"    # variable is from inventory file
+    user: "{{ juniper_user }}"        # variable is from inventory file
+    passwd: "{{ juniper_passwd }}"    # variable is from inventory file
     comment: "Test add RPM"
