@@ -1,0 +1,7 @@
+[juniper]
+juniper_01 ansible_host=10.96.10.101 juniper_user=admin juniper_passwd=ABCD1234 ansible_connection=local
+
+[all:vars]
+#Variables for connect SSH
+ansible_user = root
+ansible_port = 22

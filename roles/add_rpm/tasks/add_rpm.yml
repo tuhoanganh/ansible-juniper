@@ -1,7 +1,7 @@
 ---
 - name: Verifying NETCONF - [Step 01]
   wait_for: 
-    host: "{{ ansible_ssh_host }}" 
+    host: "{{ ansible_ssh_host }}"
     port: 830
 
 - name: Add RPM - [Step 02]

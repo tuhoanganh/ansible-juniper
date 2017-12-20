@@ -1,9 +1,21 @@
 [juniper]
-juniper_01 ansible_host=192.168.200.10 juniper_user=root juniper_passwd=ABCD1234 ansible_connection=local
-
+#juniper_01 ansible_host=192.168.200.10 juniper_user=root juniper_passwd=ABCD1234 ansible_connection=local
+ACX02 ansible_host=10.96.10.102
+ACX03 ansible_host=10.96.10.103
+ACX04 ansible_host=10.96.10.104
+ACX05 ansible_host=10.96.10.105
+ACX1 ansible_host=10.96.10.101
+ACX10 ansible_host=10.96.10.110
+ACX6 ansible_host=10.96.10.107
+ACX8 ansible_host=10.96.10.108
+ACX9 ansible_host=10.96.10.109
+AGG01 ansible_host=10.96.10.14
+PE01 ansible_host=10.96.10.2
+PE02-RE0 ansible_host=10.96.10.4
 
 [all:vars]
 #Variables for connect SSH
+juniper_user=juniper juniper_passwd=juniper@123 ansible_connection=local
 ansible_user = root
 ansible_pass = ABCD1234
 ansible_port = 22
