@@ -4,9 +4,22 @@
     host: "{{ ansible_host }}"
     port: 830
 
+- name: Get Date - [Step 02]
+  set_fact: date_info="{{lookup('pipe','date +%Y%m%d')}}"
+
+- name: Create Date directory - [Step 03]
+  file: 
+    path: "files/getinfo/{{ date_info }}"
+    state: directory
+    mode: 0777
+
+- name: Set Path
+  set_fact:
+    default_path: "files/getinfo"
+
 - name: Create Log file
   file:
-    path: "files/getinfo/{{ inventory_hostname }}.txt"
+    path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.txt"
     state: touch
     mode: "u=rw,g=rw,o=rw"
 
@@ -16,16 +29,16 @@
     user: "{{ juniper_user }}"
     passwd: "{{ juniper_passwd }}"
     cli: "show chassis hardware"
-    dest: "files/getinfo/{{ inventory_hostname }}.tmp"
+    dest: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp"
     format: text
 
 - name: Retrive information - [Step 02-2]
-  shell: cat "files/getinfo/{{ inventory_hostname }}.tmp" | grep -v -e "^$"
+  shell: cat "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp" | grep -v -e "^$"
   register: get_info
 
 - name: Write information to file - [Step 02-3]
   lineinfile:
-    path: "files/getinfo/{{ inventory_hostname }}.txt"
+    path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.txt"
     line: "{{ item }}"
   with_items:
     - "====Show Chassis Hardware==="
@@ -37,17 +50,17 @@
     user: "{{ juniper_user }}"
     passwd: "{{ juniper_passwd }}"
     cli: "show chassis fpc pic-status"
-    dest: "files/getinfo/{{ inventory_hostname }}.tmp"
+    dest: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp"
     format: text
   register: router_info
 
 - name: Retrive information - [Step 03-2]
-  shell: cat "files/getinfo/{{ inventory_hostname }}.tmp" | grep -v -e '^$'
+  shell: cat "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp" | grep -v -e '^$'
   register: get_info
 
 - name: Write information to file - [Step 03-3]
   lineinfile:
-    path: "files/getinfo/{{ inventory_hostname }}.txt"
+    path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.txt"
     line: "{{ item }}"
   with_items:
     - "====Show Chassis fpc pic-status==="
@@ -59,45 +72,48 @@
     user: "{{ juniper_user }}"
     passwd: "{{ juniper_passwd }}"
     cli: "show chassis environment"
-    dest: "files/getinfo/{{ inventory_hostname }}.tmp"
+    dest: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp"
     format: text
   register: router_info
 
 - name: Retrive information - [Step 04-2]
-  shell: cat "files/getinfo/{{ inventory_hostname }}.tmp" | grep -v -e '^$'
+  shell: cat "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp" | grep -v -e '^$'
   register: get_info
 
 - name: Write information to file - [Step 04-3]
   lineinfile:
-    path: "files/getinfo/{{ inventory_hostname }}.txt"
+    path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.txt"
     line: "{{ item }}"
   with_items:
     - "====Show Chassis environment==="
     - "{{ get_info.stdout }}"
 
-- name: Show interfaces diagnostics optics - [Step 05-1]
-  junos_cli:
-    host: "{{ ansible_host }}"
-    user: "{{ juniper_user }}"
-    passwd: "{{ juniper_passwd }}"
-    cli: "show interfaces diagnostics optics *"
-    dest: "files/getinfo/{{ inventory_hostname }}.tmp"
-    format: text
-  register: router_info
+#- name: Show interfaces diagnostics optics - [Step 05-1]
+#  junos_cli:
+#    host: "{{ ansible_host }}"
+#    user: "{{ juniper_user }}"
+#    passwd: "{{ juniper_passwd }}"
+#    cli: "show interfaces diagnostics optics *"
+#    dest: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp"
+#    format: text
+#  register: router_info
 
-- name: Retrive information - [Step 05-2]
-  shell: cat "files/getinfo/{{ inventory_hostname }}.tmp" | grep -v -e '^$'
-  register: get_info
+#- name: Retrive information - [Step 05-2]
+#  shell: cat "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp" | grep -v -e '^$'
+#  register: get_info
 
-- name: Write information to file - [Step 05-3]
-  lineinfile:
-    path: "files/getinfo/{{ inventory_hostname }}.txt"
-    line: "{{ item }}"
-  with_items:
-    - "====Show interfaces diagnostics optics==="
-    - "{{ get_info.stdout }}"
+#- name: Write information to file - [Step 05-3]
+#  lineinfile:
+#    path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.txt"
+#    line: "{{ item }}"
+#  with_items:
+#    - "====Show interfaces diagnostics optics==="
+#    - "{{ get_info.stdout }}"
 
-- name: Clean Temp file
+- name: Clear Temp file
   file:
     state: absent
-    path: "files/getinfo/{{ inventory_hostname }}.tmp"
+    path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp"
+
+#- name: Clear Expire Report (Older than 2 week)
+#  shell: "find {{ default_path }}/* -mtime +14"
