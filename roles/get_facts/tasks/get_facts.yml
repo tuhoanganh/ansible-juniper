@@ -14,4 +14,4 @@
 
 - name: Print Router information - [Step 03]
   debug:
-    msg: "{{ router_info.facts }}"
+    msg: "{{ router_info.facts.version }}"

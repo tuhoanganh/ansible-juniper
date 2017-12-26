@@ -3,7 +3,8 @@
   wait_for: 
     host: "{{ ansible_host }}"
     port: 830
-
+    timeout: 5
+    
 - name: INFORMATION - [Step 02] - Get Date
   set_fact: date_info="{{lookup('pipe','date +%Y%m%d')}}"
 
@@ -142,7 +143,7 @@
     path: "{{ item }}"
   with_items:
     - "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp"
-    - "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp"
+    - "{{ default_path }}/{{ date_info }}/items/{{ inventory_hostname }}.tmp"
 
 #- name: Clear Expire Report (Older than 2 week)
 #  shell: "find {{ default_path }}/* -mtime +14"

@@ -1,0 +1,36 @@
+---
+- name: INFORMATION - [Step 01] - Verifying NETCONF
+  wait_for:
+    host: "{{ ansible_host }}"
+    port: 830
+    timeout: 5
+
+- name: INFORMATION - [Step 02] - Get Date
+  set_fact: date_info="{{lookup('pipe','date +%Y%m%d')}}"
+
+- name: INFORMATION - [Step 03] - Set directory for storing the log files
+  set_fact:
+    default_path: "files/getversion"
+
+- name: INFORMATION - [Step 04] - Create report file
+  file:
+    path: "{{ default_path }}/devices_version_{{ date_info }}.csv"
+    state: touch
+    mode: "u=rw,g=rw,o=rw"
+
+- name: INFORMATION - [Step 05] - Retrive Juniper Facts
+  junos_get_facts:
+    host: "{{ ansible_host }}"
+    user: "{{ juniper_user }}"
+    passwd: "{{ juniper_passwd }}"
+  register: device_version
+
+- name: INFORMATION - [Step 06] - Create column name in file
+  lineinfile:
+    dest: "{{ default_path }}/devices_version_{{ date_info }}.csv"
+    line: "Hostname, IP, Version, Version_RE0, Version_RE1"
+
+- name: INFORMATION - [Step 07] - Write device version into file
+  lineinfile:
+    dest: "{{ default_path }}/devices_version_{{ date_info }}.csv"
+    line: "{{ inventory_hostname }},{{ ansible_host }},{{ device_version.facts.version }},{{ device_version.facts.version_RE0 }},{{ device_version.facts.version_RE1 }}"

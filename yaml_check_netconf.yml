@@ -1,0 +1,10 @@
+- hosts: all
+  serial: 100
+  gather_facts: yes
+  connection: local
+  tasks:
+    - name: INFORMATION - [Step 01] - Verifying NETCONF
+      wait_for:
+        host: "{{ ansible_host }}"
+        port: 830
+        timeout: 5
