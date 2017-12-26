@@ -1,0 +1,40 @@
+juniper_02 - 10.96.10.102
+====Show Chassis Hardware===
+Hardware inventory:
+Item             Version  Part number  Serial number     Description
+Chassis                                NK0214210148      ACX2100
+Midplane         REV 10   650-045221   NK0214210148      ACX2100
+Routing Engine            BUILTIN      BUILTIN           Routing Engine
+FEB 0                     BUILTIN      BUILTIN           Forwarding Engine Processor
+FPC 0                     BUILTIN      BUILTIN           FPC BUILTIN
+  MIC 0                   BUILTIN      BUILTIN           16x CHE1T1, RJ48
+    PIC 0                 BUILTIN      BUILTIN           16x CHE1T1, RJ48
+FPC 1                     BUILTIN      BUILTIN           FPC BUILTIN
+  MIC 0                   BUILTIN      BUILTIN           4x 1GE(LAN) RJ45
+    PIC 0                 BUILTIN      BUILTIN           4x 1GE(LAN) RJ45
+  MIC 1                   BUILTIN      BUILTIN           4x 1GE(LAN) SFP, RJ45
+    PIC 1                 BUILTIN      BUILTIN           4x 1GE(LAN) SFP, RJ45
+      Xcvr 0     REV 01   740-017726   AX15110006447     SFP-EX
+      Xcvr 1     REV 01   740-011783   AX15030011489     SFP-LX10
+  MIC 2                   BUILTIN      BUILTIN           2x 1GE(LAN) SFP
+    PIC 2                 BUILTIN      BUILTIN           2x 1GE(LAN) SFP
+  MIC 3                   BUILTIN      BUILTIN           2x 10GE(LAN) SFP+
+    PIC 3                 BUILTIN      BUILTIN           2x 10GE(LAN) SFP+
+====Show Chassis fpc pic-status===
+Slot 0   Online      
+  PIC 0  Online       16x CHE1T1, RJ48
+Slot 1   Online      
+  PIC 0  Online       4x 1GE(LAN) RJ45
+  PIC 1  Online       4x 1GE(LAN) SFP, RJ45
+  PIC 2  Online       2x 1GE(LAN) SFP
+  PIC 3  Online       2x 10GE(LAN) SFP+
+====Show Chassis environment===
+Class Item                           Status     Measurement
+      PCB Left                       OK         52 degrees C / 125 degrees F
+      SFP+ Xcvr                      OK         46 degrees C / 114 degrees F
+      FEB                            OK         67 degrees C / 152 degrees F
+      PCB Up                         OK         47 degrees C / 116 degrees F
+      PCB Mid                        OK         51 degrees C / 123 degrees F
+      Telecom Mod                    OK         52 degrees C / 125 degrees F
+      Routing Engine                 OK         49 degrees C / 120 degrees F
+      Heater off                    

@@ -1,0 +1,11 @@
+juniper_04 - 10.96.10.104
+====Show Chassis Hardware===
+FPC 0                     BUILTIN      BUILTIN           FPC BUILTIN
+    PIC 0                 BUILTIN      BUILTIN           16x CHE1T1, RJ48
+FPC 1                     BUILTIN      BUILTIN           FPC BUILTIN
+    PIC 0                 BUILTIN      BUILTIN           4x 1GE(LAN) RJ45
+    PIC 1                 BUILTIN      BUILTIN           4x 1GE(LAN) SFP, RJ45
+      Xcvr 0     REV 01   740-017726   AX15110006451     SFP-EX
+      Xcvr 1     REV 01   740-017726   AX17030004909     SFP-EX
+    PIC 2                 BUILTIN      BUILTIN           2x 1GE(LAN) SFP
+    PIC 3                 BUILTIN      BUILTIN           2x 10GE(LAN) SFP+
