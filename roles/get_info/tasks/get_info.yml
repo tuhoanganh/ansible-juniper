@@ -1,41 +1,41 @@
 ---
-- name: [Step 01] -Verifying NETCONF
+- name: [Step 01] Verifying NETCONF
   wait_for: 
     host: "{{ ansible_host }}"
     port: 830
 
-- name: [Step 02] - Get Date
+- name: [Step 02] Get Date
   set_fact: date_info="{{lookup('pipe','date +%Y%m%d')}}"
 
-- name: [Step 03] -Create Date directory
+- name: [Step 03] Create Date directory
   file: 
     path: "files/getinfo/{{ date_info }}"
     state: directory
     mode: 0777
 
-- name: [Step 04] - Create FPC directory
+- name: [Step 04] Create FPC directory
   file:
     path: "files/getinfo/{{ date_info }}/items"
     state: directory
     mode: 0777
 
-- name: [Step 05] - Set directory for storing the log files
+- name: [Step 05] Set directory for storing the log files
   set_fact:
     default_path: "files/getinfo"
 
-- name: [Step 06] - Create Log file
+- name: [Step 06] Create Log file
   file:
     path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.txt"
     state: touch
     mode: "u=rw,g=rw,o=rw"
 
-- name: [Step 07] - Create Item's log file
+- name: [Step 07] Create Item's log file
   file:
     path: "{{ default_path }}/{{ date_info }}/items/{{ inventory_hostname }}.txt"
     state: touch
     mode: "u=rw,g=rw,o=rw"
 
-- name: [Step 08] - Show Chassis hardware
+- name: [Step 08] Show Chassis hardware
   junos_cli:
     host: "{{ ansible_host }}"
     user: "{{ juniper_user }}"
@@ -44,15 +44,15 @@
     dest: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp"
     format: text
 
-- name: [Step 09] - Retrive information
+- name: [Step 09] Retrive information
   shell: cat "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp" | grep -v -e "^$"
   register: get_info
 
-- name: [Step 10] -  Retrive information
+- name: [Step 10] Retrive information
   shell: cat "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp" | grep "FPC\|Xcvr\|PIC"
   register: get_item_info
 
-- name: [Step 11] - Write information to file
+- name: [Step 11] Write information to file
   lineinfile:
     path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.txt"
     line: "{{ item }}"
@@ -61,7 +61,7 @@
     - "====Show Chassis Hardware==="
     - "{{ get_info.stdout }}"
 
-- name: [Step 12] - Write information to file
+- name: [Step 12] Write information to file
   lineinfile: 
     path: "{{ default_path }}/{{ date_info }}/items/{{ inventory_hostname }}.txt"
     line: "{{ item }}"
@@ -70,7 +70,7 @@
     - "====Show Chassis Hardware==="
     - "{{ get_item_info.stdout }}"
 
-- name: [Step 13] - Show Chassis fpc pic-status
+- name: [Step 13] Show Chassis fpc pic-status
   junos_cli:
     host: "{{ ansible_host }}"
     user: "{{ juniper_user }}"
@@ -80,11 +80,11 @@
     format: text
   register: router_info
 
-- name: [Step 14] - Retrive information
+- name: [Step 14] Retrive information
   shell: cat "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp" | grep -v -e '^$'
   register: get_info
 
-- name: [Step 15] - Write information to file
+- name: [Step 15] Write information to file
   lineinfile:
     path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.txt"
     line: "{{ item }}"
@@ -92,7 +92,7 @@
     - "====Show Chassis fpc pic-status==="
     - "{{ get_info.stdout }}"
 
-- name: [Step 16] - Show Chassis environment
+- name: [Step 16] Show Chassis environment
   junos_cli:
     host: "{{ ansible_host }}"
     user: "{{ juniper_user }}"
@@ -102,11 +102,11 @@
     format: text
   register: router_info
 
-- name: [Step 17] - Retrive information
+- name: [Step 17] Retrive information
   shell: cat "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp" | grep -v -e '^$'
   register: get_info
 
-- name: [Step 18] - Write information to file
+- name: [Step 18] Write information to file
   lineinfile:
     path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.txt"
     line: "{{ item }}"
@@ -136,7 +136,7 @@
 #    - "====Show interfaces diagnostics optics==="
 #    - "{{ get_info.stdout }}"
 
-- name: [Step 19] - Clear Temp file
+- name: [Step 19] Clear Temp file
   file:
     state: absent
     path: "{{ item }}"
