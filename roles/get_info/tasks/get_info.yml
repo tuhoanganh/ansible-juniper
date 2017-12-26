@@ -7,22 +7,30 @@
     
 - name: INFORMATION - [Step 02] - Get Date
   set_fact: date_info="{{lookup('pipe','date +%Y%m%d')}}"
+  run_once: true
+  delegate_to: localhost
 
 - name: INFORMATION - [Step 03] - Create Date directory
   file: 
     path: "files/getinfo/{{ date_info }}"
     state: directory
     mode: 0777
+  run_once: true
+  delegate_to: localhost
 
 - name: INFORMATION - [Step 04] - Create FPC directory
   file:
     path: "files/getinfo/{{ date_info }}/items"
     state: directory
     mode: 0777
+  run_once: true
+  delegate_to: localhost
 
 - name: INFORMATION - [Step 05] - Set directory for storing the log files
   set_fact:
     default_path: "files/getinfo"
+  run_once: true
+  delegate_to: localhost
 
 - name: INFORMATION - [Step 06] - Create Log file
   file:
@@ -49,7 +57,7 @@
   shell: cat "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp" | grep -v -e "^$"
   register: get_info
 
-- name: INFORMATION - [Step 10] - Retrive information
+- name: INFORMATION - [Step 10] - Retrive Hardware's information
   shell: cat "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp" | grep "FPC\|Xcvr\|PIC"
   register: get_item_info
 
