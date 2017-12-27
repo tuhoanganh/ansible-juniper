@@ -18,13 +18,12 @@
   run_once: true
   delegate_to: localhost
 
-- name: INFORMATION - [Step 04] - Retrive Juniper Facts
-  junos_get_facts:
-    host: "{{ ansible_host }}"
-    user: "{{ juniper_user }}"
-    passwd: "{{ juniper_passwd }}"
-  register: device_version
-
+- name: INFORMATION - [Step 04] - Create Temporary file
+  file:
+    path: "{{ default_path }}/{{ inventory_hostname }}.tmp"
+    state: touch
+    mode: "u=rw,g=rw,o=rw"
+  
 - name: INFORMATION - [Step 05] - Create column name in file
   lineinfile:
     dest: "{{ default_path }}/devices_version_{{ date_info }}.csv"
@@ -32,7 +31,28 @@
   run_once: true
   delegate_to: localhost
 
-- name: INFORMATION - [Step 06] - Write device version into file
+- name: INFORMATION - [Step 06] - Retrive Juniper Facts
+  junos_get_facts:
+    host: "{{ ansible_host }}"
+    user: "{{ juniper_user }}"
+    passwd: "{{ juniper_passwd }}"
+  register: device_version
+
+- name: INFORMATION - [Step 07] - Write device version into temporary file
   lineinfile:
-    dest: "{{ default_path }}/devices_version_{{ date_info }}.csv"
+    dest: "{{ default_path }}/{{ inventory_hostname }}.tmp"
     line: "{{ inventory_hostname }},{{ ansible_host }},{{ device_version.facts.version }},{{ device_version.facts.version_RE0 }},{{ device_version.facts.version_RE1 }}"
+    state: present
+
+- name: INFORMATION - [Step 08] - Collect all devices version and store into csv file
+  shell: "{{ item }}"
+  with_items:
+    - "cat {{ default_path }}/*.tmp > {{ default_path }}/devices_version_{{ date_info }}.tmp"
+    - "sort {{ default_path }}/devices_version_{{ date_info }}.tmp >> {{ default_path }}/devices_version_{{ date_info }}.csv"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 09] - Clear Temp file
+  shell:  "find {{ default_path }}/*.tmp -delete"
+  run_once: true
+  delegate_to: localhost
