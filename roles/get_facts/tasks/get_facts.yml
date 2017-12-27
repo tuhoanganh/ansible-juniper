@@ -1,17 +1,12 @@
 ---
-- name: Verifying NETCONF - [Step 01]
-  wait_for: 
-    host: "{{ ansible_host }}"
-    port: 830
-
-- name: Retrive Juniper Facts - [Step 02]
+- name: INFORMATION - [Step 01] - Retrive Juniper Facts
   junos_get_facts:
     host: "{{ ansible_host }}"
     user: "{{ juniper_user }}"
     passwd: "{{ juniper_passwd }}"
-    savedir: ./
+    savedir: ./files
   register: router_info
 
-- name: Print Router information - [Step 03]
+- name: INFORMATION - [Step 02] - Print Router information
   debug:
     msg: "{{ router_info.facts.version }}"

@@ -3,5 +3,6 @@
   gather_facts: yes
   connection: local
   roles:
+    - role: check_netconf
     - role: get_info
       
