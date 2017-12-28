@@ -26,7 +26,7 @@
 
 - name: INFORMATION - [Step 05] - Create Log file
   file:
-    path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp"
+    path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }},{{ ansible_host }}.tmp"
     state: touch
     mode: "u=rw,g=rw,o=rw"
 
@@ -41,7 +41,7 @@
 - name: INFORMATION - [Step 05] - Create column name in file
   lineinfile:
     path: "{{ default_path }}/{{ date_info }}/result_{{ date_info }}.csv"
-    line: "Hostname, Status"
+    line: "Hostname, IP, Status"
   run_once: true
   delegate_to: localhost
 
@@ -52,18 +52,22 @@
     user: "{{ juniper_user }}"
     passwd: "{{ juniper_passwd }}"
     cli: "file list /var/db/scripts/event/{{ file_name }}"
-    dest: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp"
+    dest: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }},{{ ansible_host }}.tmp"
     format: xml
+  register: test
+
+- debug:
+    msg: "{{ test }}"
 
 - name: INFORMATION - [Step 08] - Collect all devices version and store into csv file
   shell: "{{ item }}"
   with_items:
     - "grep -l {{ default_path}}/{{ date_info }}/*.tmp -e 'total-files' >> {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv"
     - 'sed -i "s/^.*\///g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
-    - 'sed -i "s/.tmp/, {{ ansible_host }}, OK/g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
+    - 'sed -i "s/.tmp/, OK/g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
     - "grep -l {{ default_path}}/{{ date_info }}/*.tmp -e 'No such file or directory' >> {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv"
     - 'sed -i "s/^.*\///g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
-    - 'sed -i "s/.tmp/, {{ ansible_host }}, NOT FOUND/g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
+    - 'sed -i "s/.tmp/, NOT FOUND/g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
   run_once: true
   delegate_to: localhost
   ignore_errors: yes
