@@ -60,10 +60,10 @@
   with_items:
     - "grep -l {{ default_path}}/{{ date_info }}/*.tmp -e 'total-files' >> {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv"
     - 'sed -i "s/^.*\///g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
-    - 'sed -i "s/.tmp/,OK/g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
+    - 'sed -i "s/.tmp/, {{ ansible_host }}, OK/g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
     - "grep -l {{ default_path}}/{{ date_info }}/*.tmp -e 'No such file or directory' >> {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv"
     - 'sed -i "s/^.*\///g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
-    - 'sed -i "s/.tmp/,NOT FOUND/g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
+    - 'sed -i "s/.tmp/, {{ ansible_host }}, NOT FOUND/g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
   run_once: true
   delegate_to: localhost
   ignore_errors: yes
