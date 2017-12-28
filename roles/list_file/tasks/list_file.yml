@@ -1,0 +1,75 @@
+---
+- name: INFORMATION - [Step 01] - Get Date
+  set_fact: date_info="{{lookup('pipe','date +%Y%m%d')}}"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 02] - Create Date directory
+  file: 
+    path: "files/listfile/{{ date_info }}"
+    state: directory
+    mode: 0777
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 04] - Set directory for storing the log files
+  set_fact:
+    default_path: "files/listfile"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 04] - Set file name that need to search
+  set_fact:
+    file_name: "Optic.slax123"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 05] - Create Log file
+  file:
+    path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp"
+    state: touch
+    mode: "u=rw,g=rw,o=rw"
+
+- name: INFORMATION - [Step 05] - Create result file
+  file:
+    path: "{{ default_path }}/{{ date_info }}/result_{{ date_info }}.csv"
+    state: touch
+    mode: "u=rw,g=rw,o=rw"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 05] - Create column name in file
+  lineinfile:
+    path: "{{ default_path }}/{{ date_info }}/result_{{ date_info }}.csv"
+    line: "Hostname, Status"
+  run_once: true
+  delegate_to: localhost
+
+
+- name: INFORMATION - [Step 07] - Searching file in devices
+  junos_cli:
+    host: "{{ ansible_host }}"
+    user: "{{ juniper_user }}"
+    passwd: "{{ juniper_passwd }}"
+    cli: "file list /var/db/scripts/event/{{ file_name }}"
+    dest: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.tmp"
+    format: xml
+
+- name: INFORMATION - [Step 08] - Collect all devices version and store into csv file
+  shell: "{{ item }}"
+  with_items:
+    - "grep -l {{ default_path}}/{{ date_info }}/*.tmp -e 'total-files' >> {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv"
+    - 'sed -i "s/^.*\///g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
+    - 'sed -i "s/.tmp/,OK/g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
+    - "grep -l {{ default_path}}/{{ date_info }}/*.tmp -e 'No such file or directory' >> {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv"
+    - 'sed -i "s/^.*\///g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
+    - 'sed -i "s/.tmp/,NOT FOUND/g" {{ default_path}}/{{ date_info }}/result_{{ date_info }}.csv'
+  run_once: true
+  delegate_to: localhost
+  ignore_errors: yes
+
+- name: INFORMATION - [Step 09] - Clear Temp file
+  shell:  "find {{ default_path }}/{{ date_info }}/*.tmp -delete"
+  run_once: true
+  delegate_to: localhost
+

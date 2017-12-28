@@ -1,0 +1,7 @@
+---
+- hosts: all
+  gather_facts: yes
+  connection: local
+  roles:
+    - role: check_netconf
+    - role: list_file
