@@ -1,0 +1,939 @@
+
+## Last commit: 2017-12-15 14:08:46 ICT by juniper
+version 12.3X54-D27.1;
+groups {
+    MTU {
+        interfaces {
+            <ge-*> {
+                mtu 9014;
+                hold-time up 2000 down 0;
+            }
+            <xe-*> {
+                mtu 9014;
+                hold-time up 2000 down 0;
+                link-mode full-duplex;
+                optics-options {
+                    alarm low-light-alarm {
+                        link-down;
+                    }
+                    warning low-light-warning {
+                        syslog;
+                    }
+                }
+            }
+        }
+    }
+    rfc2544-srt02 {
+        services {
+            rpm {
+                rfc2544-benchmarking {
+                    profiles {
+                        test-profile tp-packetloss {
+                            test-type latency;
+                            packet-size 128;
+                            bandwidth-kbps 1186;
+                        }
+                    }
+                    tests {
+                        test-name packetloss {
+                            test-profile tp-packetloss;
+                            source-mac-address 00:00:00:00:01:01;
+                            destination-mac-address 00:00:00:00:01:02;
+                            forwarding-class EF;
+                            mode initiate-and-terminate;
+                            family ccc;
+                            direction egress;
+                            source-udp-port 100;
+                            destination-udp-port 100;
+                            test-iterator-duration 600;
+                            test-interface ge-1/0/0.100;
+                            destination-ipv4-address 100.0.0.1;
+                            source-ipv4-address 200.0.0.1;
+                        }
+                    }
+                }
+            }
+        }
+        interfaces {
+            ge-1/0/0 {
+                flexible-vlan-tagging;
+                encapsulation flexible-ethernet-services;
+                unit 100 {
+                    description "Test RFC2544 Viba";
+                    encapsulation vlan-ccc;
+                    vlan-id 100;
+                    family ccc;
+                }
+            }
+        }
+        protocols {
+            l2circuit {
+                neighbor 10.2.254.3 {
+                    interface ge-1/0/0.100 {
+                        virtual-circuit-id 100;
+                        ignore-mtu-mismatch;
+                    }
+                }
+            }
+        }
+    }
+}
+apply-groups [ MTU rfc2544-srt02 ];
+system {
+    host-name SRT04;
+    auto-snapshot;
+    time-zone Asia/Saigon;
+    inactive: authentication-order [ tacplus password ];
+    root-authentication {
+        encrypted-password "$1$QhmAB.el$u9s1nl1uXRM.jLNCHv9.p0"; ## SECRET-DATA
+    }
+    name-server {
+        8.8.8.8;
+    }
+    login {
+        announcement "SRT config template!!\n";
+        class admin {
+            idle-timeout 10;
+            permissions all;
+        }
+        class view-all {
+            idle-timeout 10;
+            permissions [ clear network view view-configuration ];
+        }
+        user gate-pro {
+            uid 2006;
+            class view-all;
+        }
+        user juniper {
+            uid 2002;
+            class super-user;
+            authentication {
+                encrypted-password "$1$PxHyPUZf$XnPU7YtoFOtxohAJrqFNq0"; ## SECRET-DATA
+            }
+        }
+        user remote {
+            uid 2007;
+            class admin;
+        }
+        user tms {
+            uid 2008;
+            class admin;
+        }
+        user viettel {
+            uid 2009;
+            class super-user;
+            authentication {
+                encrypted-password "$5$9k9GE/y7$PyU9TOpIZSh10HBn850cChzmhS3mAjUVotMYI.Gsyg."; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ftp {
+            connection-limit 5;
+        }
+        ssh {
+            root-login deny;
+            protocol-version v2;
+            max-sessions-per-connection 32;
+        }
+        telnet {
+            connection-limit 30;
+            rate-limit 150;
+        }
+        netconf {
+            ssh;
+        }
+    }
+    syslog {
+        archive size 10m files 10;
+        user * {
+            any critical;
+        }
+        host 10.58.65.189 {
+            any notice;
+            daemon any;
+            kernel any;
+            interactive-commands any;
+            facility-override local7;
+            log-prefix HDG0414SRT03;
+        }
+        file messages {
+            any info;
+            authorization none;
+            archive world-readable;
+            explicit-priority;
+        }
+        file interactive-commands {
+            interactive-commands any;
+            match "!(UI_JUNOSCRIPT_CMD)";
+        }
+        file security {
+            authorization info;
+        }
+        file firewall-filter-log {
+            firewall info;
+        }
+        file config-changes {
+            change-log info;
+        }
+        inactive: file default-log-messages {
+            any info;
+            match "(requested 'commit' operation)|(requested 'commit synchronize' operation)|(copying configuration to juniper.save)|(commit complete)|ifAdminStatus|(FRU power)|(FRU removal)|(FRU insertion)|(link UP)|transitioned|Transferred|transfer-file|(license add)|(license delete)|(package -X update)|(package -X delete)|(FRU Online)|(FRU Offline)|(plugged in)|(unplugged)|CFMD_CCM_DEFECT| LFMD_3AH | RPD_MPLS_PATH_BFD|(Master Unchanged, Members Changed)|(Master Changed, Members Changed)|(Master Detected, Members Changed)|(vc add)|(vc delete)|(Master detected)|(Master changed)|(Backup detected)|(Backup changed)|(interface vcp-)|(AIS_DATA_AVAILABLE)";
+            structured-data;
+        }
+        time-format year millisecond;
+    }
+    ntp {
+        server 10.2.255.11;
+        server 10.2.255.12;
+        source-address 10.2.254.4;
+    }
+}
+chassis {
+    aggregated-devices {
+        ethernet {
+            device-count 3;
+        }
+    }
+    fpc 0 {
+        pic 0 {
+            framing e1;
+        }
+    }
+    alarm {
+        management-ethernet {
+            link-down ignore;
+        }
+        ethernet {
+            link-down ignore;
+        }
+    }
+}
+interfaces {
+    ge-1/0/0 {
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 22 {
+            description 2G-BTS;
+            encapsulation vlan-ccc;
+            vlan-id 22;
+            input-vlan-map pop;
+            output-vlan-map push;
+        }
+        unit 36 {
+            description HSI;
+            encapsulation vlan-ccc;
+            vlan-id 36;
+            input-vlan-map pop;
+            output-vlan-map push;
+        }
+        unit 200 {
+            description 3G-nodeB-ATP;
+            vlan-id 200;
+            family inet {
+                filter {
+                    input 3G_CLASSIFIER;
+                }
+                address 172.20.4.1/24;
+                address 172.21.4.1/24;
+                address 172.22.4.1/24;
+            }
+        }
+        unit 300 {
+            description 4G_EnodeB;
+            vlan-id 300;
+            family inet {
+                address 172.30.4.1/24;
+                address 172.31.4.1/24;
+                address 172.32.4.1/24;
+            }
+        }
+    }
+    ge-1/1/0 {
+        description To_SRT03_ge-1/1/1;
+        unit 0 {
+            family inet {
+                address 10.2.1.14/30;
+            }
+            family inet6;
+            family mpls;
+        }
+    }
+    ge-1/1/1 {
+        description To_SRT05_ge-1/1/0;
+        unit 0 {
+            family inet {
+                address 10.2.1.17/30;
+            }
+            family inet6;
+            family mpls;
+        }
+    }
+    fxp0 {
+        unit 0 {
+            family inet {
+                address 10.96.10.104/14;
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet {
+                inactive: filter {
+                    input PROTECT_RE;
+                }
+                address 10.2.254.4/32 {
+                    primary;
+                    preferred;
+                }
+                address 10.22.254.4/32;
+            }
+        }
+    }
+}
+snmp {
+    name ACX04;
+    community public {
+        clients {
+            10.96.0.0/14;
+        }
+    }
+    trap-group space {
+        targets {
+            10.96.1.102;
+        }
+    }
+}
+routing-options {
+    graceful-restart;
+    interface-routes {
+        rib-group inet INET0_TO_INET3;
+    }
+    static {
+        route 10.0.0.0/8 next-hop 10.96.0.1;
+    }
+    rib-groups {
+        INET0_TO_INET3 {
+            import-rib [ inet.0 inet.3 ];
+            import-policy INET0_TO_INET3;
+        }
+        INET3_TO_INET0 {
+            import-rib [ inet.3 inet.0 ];
+            import-policy INET3_TO_INET0;
+        }
+    }
+    router-id 10.2.254.4;
+    autonomous-system 7552;
+    forwarding-table {
+        export LOAD_BALANCE;
+        chained-composite-next-hop {
+            ingress {
+                l3vpn;
+            }
+        }
+    }
+    multicast {
+        ssm-groups 239.0.0.0/8;
+    }
+}
+protocols {
+    rsvp {
+        interface ge-1/1/0.0 {
+            authentication-key "$9$iqTFu0Iyrv1RVYgoji369AO1EcyKWLz3n9"; ## SECRET-DATA
+            aggregate;
+            reliable;
+            link-protection;
+        }
+        interface ge-1/1/1.0 {
+            authentication-key "$9$w82ZD5T3AtOFnlM8XbwjHqmQF69A01RUjiq"; ## SECRET-DATA
+            aggregate;
+            reliable;
+            link-protection;
+        }
+    }
+    mpls {
+        statistics {
+            file MPLS-LSP-STATS size 5m files 10;
+            interval 300;
+        }
+        log-updown {
+            syslog;
+            trap;
+            trap-path-down;
+            trap-path-up;
+        }
+        admin-groups {
+            SRT_COLOR_1_13 13;
+            SRT_COLOR_2_20 20;
+        }
+        smart-optimize-timer 30;
+        no-propagate-ttl;
+        explicit-null;
+        ipv6-tunneling;
+        icmp-tunneling;
+        optimize-timer 180;
+        label-switched-path SRT04_TO_AGG01 {
+            to 10.2.255.11;
+            admin-group include-all [ SRT_COLOR_1_13 SRT_COLOR_2_20 ];
+            adaptive;
+            fast-reroute {
+                hop-limit 20;
+            }
+        }
+        label-switched-path SRT04_TO_AGG02 {
+            to 10.2.255.12;
+            admin-group include-all [ SRT_COLOR_1_13 SRT_COLOR_2_20 ];
+            adaptive;
+            fast-reroute {
+                hop-limit 20;
+            }
+        }
+        path p-SRT04_TO_AGG01 {
+            10.2.1.13 strict;
+            10.2.1.9 strict;
+            10.2.1.5 strict;
+            10.2.1.1 strict;
+        }
+        path s-SRT04_TO_AGG01 {
+            10.2.1.18 strict;
+            10.2.1.22 strict;
+            10.2.1.25 strict;
+        }
+        path s-SRT04_TO_AGG02 {
+            10.2.1.13 strict;
+            10.2.1.9 strict;
+            10.2.1.5 strict;
+            10.2.1.1 strict;
+            10.2.1.26 strict;
+        }
+        path p-SRT04_TO_AGG02 {
+            10.2.1.18 strict;
+            10.2.1.22 strict;
+        }
+        interface ge-1/1/0.0 {
+            admin-group [ SRT_COLOR_1_13 SRT_COLOR_2_20 ];
+        }
+        interface ge-1/1/1.0 {
+            admin-group [ SRT_COLOR_1_13 SRT_COLOR_2_20 ];
+        }
+    }
+    bgp {
+        precision-timers;
+        traceoptions {
+            file bgp_debug size 10m files 10;
+            flag all detail;
+        }
+        hold-time 180;
+        mtu-discovery;
+        log-updown;
+        family inet {
+            unicast;
+            labeled-unicast {
+                rib-group INET3_TO_INET0;
+                per-prefix-label;
+                rib {
+                    inet.3;
+                }
+            }
+        }
+        family inet-vpn {
+            unicast;
+        }
+        family inet6-vpn {
+            unicast;
+        }
+        family route-target;
+        graceful-restart {
+            restart-time 180;
+            stale-routes-time 500;
+        }
+        group SRT_TO_AGG {
+            type internal;
+            traceoptions {
+                file GR_BGP size 1m files 5;
+                flag all detail;
+            }
+            local-address 10.2.254.4;
+            authentication-key "$9$UGiPTAtOhcl0BNbs2GUQFn/p01RhrKM5Qzn"; ## SECRET-DATA
+            export SRT_TO_AGG_INET3;
+            neighbor 10.2.255.11;
+            neighbor 10.2.255.12;
+        }
+    }
+    ospf {
+        traceoptions {
+            file GR_OSPF size 1m files 5;
+            flag graceful-restart detail;
+        }
+        spf-options {
+            rapid-runs 5;
+        }
+        overload timeout 300;
+        graceful-restart restart-duration 180;
+        traffic-engineering;
+        reference-bandwidth 1000g;
+        area 0.0.0.100 {
+            interface lo0.0 {
+                passive;
+            }
+            interface ge-1/1/0.0 {
+                interface-type p2p;
+                metric 1000;
+                ldp-synchronization;
+                authentication {
+                    md5 1 key "$9$jRk5zpu1SyKBIds24DjFn/C0BRhSeM8QF3/"; ## SECRET-DATA
+                }
+                bfd-liveness-detection {
+                    minimum-interval 100;
+                    multiplier 3;
+                    no-adaptation;
+                }
+            }
+            interface ge-1/1/1.0 {
+                interface-type p2p;
+                metric 1000;
+                ldp-synchronization;
+                authentication {
+                    md5 1 key "$9$m5n9IRSvMXcy2aZU.mCtuOEcrevL7-/CAu"; ## SECRET-DATA
+                }
+                bfd-liveness-detection {
+                    minimum-interval 100;
+                    multiplier 3;
+                    no-adaptation;
+                }
+            }
+        }
+    }
+    ldp {
+        traceoptions {
+            file GR_LDP size 1m files 5;
+            flag all detail;
+        }
+        graceful-restart recovery-time 180;
+        track-igp-metric;
+        deaggregate;
+        explicit-null;
+        interface ge-1/1/0.0;
+        interface ge-1/1/1.0;
+        interface lo0.0;
+    }
+    pim {
+        interface ge-1/1/0.0 {
+            mode sparse;
+        }
+        interface ge-1/1/1.0 {
+            mode sparse;
+        }
+    }
+    l2circuit {
+        traceoptions {
+            file GR_L2CIRCUIT size 10m files 5;
+            flag all detail;
+        }
+        neighbor 10.2.255.11 {
+            interface ge-1/0/0.36 {
+                virtual-circuit-id 20001;
+                description For_HSI;
+                encapsulation-type ethernet-vlan;
+                ignore-encapsulation-mismatch;
+                ignore-mtu-mismatch;
+                pseudowire-status-tlv;
+                switchover-delay 100;
+                revert-time 120;
+                backup-neighbor 10.2.255.12 {
+                    virtual-circuit-id 20002;
+                    standby;
+                }
+            }
+        }
+        neighbor 10.1.255.3 {
+            interface ge-1/0/0.22 {
+                virtual-circuit-id 222223;
+                description 2G-INTEROPT-VIETTEL-TESTER;
+                encapsulation-type ethernet-vlan;
+                ignore-encapsulation-mismatch;
+                ignore-mtu-mismatch;
+                pseudowire-status-tlv;
+                switchover-delay 100;
+                backup-neighbor 10.1.255.4 {
+                    virtual-circuit-id 222223;
+                }
+            }
+        }
+    }
+    lldp {
+        interface ge-1/1/0;
+        interface ge-1/1/1;
+    }
+}
+policy-options {
+    policy-statement 3G_VRF_EXPORT {
+        term 3G_VRF_RT_EXPORT {
+            from protocol [ direct static ];
+            then {
+                community add RT_SRT_3G_EXPORT;
+            }
+        }
+        term 3G_SRT_COMMUNITY {
+            from protocol [ direct static ];
+            then {
+                local-preference 3000;
+                community add COMMUNITY_SRT_3G;
+                accept;
+            }
+        }
+    }
+    policy-statement 3G_VRF_IMPORT {
+        term 3G_VRF_RT_IMPORT {
+            from {
+                protocol bgp;
+                community [ RT_SRT_3G_IMPORT RT_SRT_3G_OAM_IMPORT RT_SRT_3G_02_IMPORT RT_SRT_3G_03_IMPORT ];
+            }
+            then accept;
+        }
+        term FINAL {
+            then reject;
+        }
+    }
+    policy-statement 4G_SERVICE_VRF_EXPORT {
+        term 4G_SERVICE_VRF_RT_EXPORT {
+            from protocol [ direct static ];
+            then {
+                community add RT_SRT_4G_SERVICE_EXPORT;
+            }
+        }
+        term 4G_SRT_COMMUNITY {
+            from protocol [ direct static ];
+            then {
+                local-preference 3000;
+                community add COMMUNITY_SRT_4G;
+                accept;
+            }
+        }
+    }
+    policy-statement 4G_SERVICE_VRF_IMPORT {
+        term 4G_SERVICE_VRF_RT_IMPORT {
+            from {
+                protocol bgp;
+                community RT_SRT_4G_SERVICE_IMPORT;
+            }
+            then accept;
+        }
+        term FINAL {
+            then reject;
+        }
+    }
+    policy-statement INET0_TO_INET3 {
+        term SRT_LOOPBACK {
+            from {
+                route-filter 10.2.254.4/32 exact;
+            }
+            then accept;
+        }
+        term PTP_SRT {
+            from {
+                route-filter 10.2.254.4/32 exact;
+            }
+            then accept;
+        }
+        term FINAL {
+            then reject;
+        }
+    }
+    policy-statement INET3_TO_INET0 {
+        term PTP_SOURCE_PE_DD_INET3_TO_INET0 {
+            from {
+                protocol bgp;
+                community GM_PTP_PEDD_TO_SRT;
+            }
+            then accept;
+        }
+        term LOOPBACK_PE_2G_INET3_TO_INET0 {
+            from {
+                protocol bgp;
+                community PE_2G_LOOPBACK0;
+            }
+            then accept;
+        }
+        term FINAL {
+            then reject;
+        }
+    }
+    policy-statement LOAD_BALANCE {
+        term load-balance {
+            then {
+                load-balance per-packet;
+                accept;
+            }
+        }
+    }
+    policy-statement SRT_TO_AGG_INET3 {
+        term SERVICE_LOOPBACK_SRT_TO_AGG {
+            from {
+                rib inet.3;
+                route-filter 10.2.254.4/32 exact;
+            }
+            then {
+                local-preference 3000;
+                community add COMMUNITY_SRT_LOOPBACK0;
+                accept;
+            }
+        }
+    }
+    community COMMUNITY_SRT_3G members [ 7552:40 7552:800 7552:2002 ];
+    community COMMUNITY_SRT_4G members [ 7552:40 7552:800 7552:2005 ];
+    community COMMUNITY_SRT_LOOPBACK0 members [ 7552:37 7552:800 7552:2000 ];
+    community GM_PTP_PEDD_TO_SRT members [ 7552:500 7552:502 7552:2008 ];
+    community PE_2G_LOOPBACK0 members [ 7552:500 7552:504 7552:2000 ];
+    community RT_SRT_3G_02_IMPORT members target:7552:210;
+    community RT_SRT_3G_03_IMPORT members target:7552:220;
+    community RT_SRT_3G_EXPORT members target:7552:201;
+    community RT_SRT_3G_IMPORT members target:7552:200;
+    community RT_SRT_3G_OAM_IMPORT members target:7552:3124;
+    community RT_SRT_4G_SERVICE_EXPORT members target:7552:65;
+    community RT_SRT_4G_SERVICE_IMPORT members target:7552:64;
+}
+class-of-service {
+    classifiers {
+        dscp CL_DSCP {
+            forwarding-class CS6 {
+                loss-priority low code-points DSCP-48;
+            }
+            forwarding-class EF {
+                loss-priority low code-points DSCP-46;
+            }
+        }
+        dscp-ipv6 CL_IPV6_DSCP {
+            forwarding-class CS6 {
+                loss-priority low code-points [ DSCP-IPV6-46 DSCP-IPV6-48 ];
+            }
+            forwarding-class AF2 {
+                loss-priority low code-points [ DSCP-IPV6-26 DSCP-IPV6-28 ];
+            }
+        }
+        exp CL_EXP {
+            forwarding-class CS6 {
+                loss-priority low code-points 110;
+            }
+            forwarding-class EF {
+                loss-priority low code-points 101;
+            }
+            forwarding-class AF4 {
+                loss-priority low code-points 100;
+            }
+            forwarding-class AF3 {
+                loss-priority low code-points 011;
+            }
+            forwarding-class AF2 {
+                loss-priority low code-points 010;
+            }
+            forwarding-class AF1 {
+                loss-priority low code-points 001;
+            }
+            forwarding-class BE {
+                loss-priority low code-points 000;
+            }
+        }
+    }
+    code-point-aliases {
+        dscp {
+            DSCP-46 101110;
+            DSCP-48 110000;
+        }
+        dscp-ipv6 {
+            DSCP-IPV6-46 101110;
+            DSCP-IPV6-48 110000;
+            DSCP-IPV6-26 011010;
+            DSCP-IPV6-28 011100;
+        }
+    }
+    host-outbound-traffic {
+        forwarding-class CS6;
+        dscp-code-point cs6;
+    }
+    drop-profiles {
+        BE_DROP_PROFILE {
+            fill-level 100 drop-probability 100;
+            fill-level 60 drop-probability 0;
+        }
+    }
+    forwarding-classes {
+        class CS7 queue-num 7;
+        class AF3 queue-num 5;
+        class AF2 queue-num 4;
+        class AF4 queue-num 6;
+        class CS6 queue-num 3;
+        class EF queue-num 2;
+        class AF1 queue-num 1;
+        class BE queue-num 0;
+    }
+    system-defaults {
+        classifiers {
+            exp CL_EXP;
+        }
+    }
+    interfaces {
+        e1-0/0/* {
+            unit * {
+                forwarding-class CS6;
+            }
+        }
+        ge-1/1/0 {
+            scheduler-map SCH_MAP;
+            unit 0 {
+                rewrite-rules {
+                    exp RW_EXP;
+                }
+            }
+            classifiers {
+                dscp CL_DSCP;
+            }
+            rewrite-rules {
+                dscp RW_DSCP;
+            }
+        }
+        ge-1/1/1 {
+            scheduler-map SCH_MAP;
+            unit 0 {
+                rewrite-rules {
+                    exp RW_EXP;
+                }
+            }
+            classifiers {
+                dscp CL_DSCP;
+            }
+            rewrite-rules {
+                dscp RW_DSCP;
+            }
+        }
+    }
+    routing-instances {
+        all {
+            classifiers {
+                exp CL_EXP;
+            }
+        }
+    }
+    rewrite-rules {
+        dscp RW_DSCP {
+            forwarding-class CS6 {
+                loss-priority low code-point DSCP-48;
+            }
+            forwarding-class EF {
+                loss-priority low code-point DSCP-46;
+            }
+        }
+        exp RW_EXP {
+            forwarding-class CS6 {
+                loss-priority low code-point 110;
+            }
+            forwarding-class EF {
+                loss-priority low code-point 101;
+            }
+            forwarding-class AF4 {
+                loss-priority low code-point 100;
+            }
+            forwarding-class AF3 {
+                loss-priority low code-point 011;
+            }
+            forwarding-class AF2 {
+                loss-priority low code-point 010;
+            }
+            forwarding-class AF1 {
+                loss-priority low code-point 001;
+            }
+            forwarding-class BE {
+                loss-priority low code-point 000;
+            }
+        }
+    }
+    scheduler-maps {
+        SCH_MAP {
+            forwarding-class CS6 scheduler S_CS6;
+            forwarding-class EF scheduler S_EF;
+            forwarding-class AF4 scheduler S_AF4;
+            forwarding-class AF3 scheduler S_AF3;
+            forwarding-class AF2 scheduler S_AF2;
+            forwarding-class AF1 scheduler S_AF1;
+            forwarding-class BE scheduler S_BE;
+        }
+    }
+    schedulers {
+        S_CS6 {
+            transmit-rate percent 15;
+            shaping-rate percent 75;
+            buffer-size percent 15;
+            priority strict-high;
+        }
+        S_EF {
+            transmit-rate percent 70;
+            buffer-size percent 70;
+            priority strict-high;
+        }
+        S_AF4 {
+            transmit-rate percent 5;
+            buffer-size percent 5;
+            priority low;
+        }
+        S_AF3 {
+            transmit-rate percent 4;
+            buffer-size percent 4;
+            priority low;
+        }
+        S_AF2 {
+            transmit-rate percent 3;
+            buffer-size percent 3;
+            priority low;
+        }
+        S_AF1 {
+            transmit-rate percent 2;
+            buffer-size percent 2;
+            priority low;
+        }
+        S_BE {
+            transmit-rate percent 1;
+            buffer-size percent 1;
+            priority low;
+            drop-profile-map loss-priority any protocol any drop-profile BE_DROP_PROFILE;
+        }
+    }
+}
+firewall {
+    family inet {
+        filter 3G_CLASSIFIER {
+            term SIGNAL_VOICE {
+                from {
+                    dscp [ 46 48 ];
+                }
+                then {
+                    forwarding-class CS6;
+                    accept;
+                }
+            }
+            term FINAL {
+                then {
+                    forwarding-class EF;
+                    accept;
+                }
+            }
+        }
+    }
+}
+routing-instances {
+    VRF_3G {
+        instance-type vrf;
+        interface ge-1/0/0.200;
+        route-distinguisher 7552:201;
+        vrf-import 3G_VRF_IMPORT;
+        vrf-export 3G_VRF_EXPORT;
+        vrf-table-label;
+    }
+    VRF_4G_SERVICE {
+        instance-type vrf;
+        interface ge-1/0/0.300;
+        route-distinguisher 7552:300;
+        vrf-import 4G_SERVICE_VRF_IMPORT;
+        vrf-export 4G_SERVICE_VRF_EXPORT;
+        vrf-table-label;
+    }
+}

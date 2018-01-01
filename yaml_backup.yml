@@ -1,0 +1,8 @@
+---
+- hosts: all
+  serial: 50
+  gather_facts: yes
+  connection: local
+  roles:
+    - role: check_netconf
+    - role: backup_config

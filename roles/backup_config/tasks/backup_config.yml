@@ -1,0 +1,37 @@
+---
+- name: INFORMATION - [Step 01] - Get Date
+  set_fact: date_info="{{lookup('pipe','date +%Y%m%d')}}"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 02] - Create Date directory
+  file: 
+    path: "files/backup_config/{{ date_info }}"
+    state: directory
+    mode: 0777
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 03] - Set directory for storing the log files
+  set_fact:
+    default_path: "files/backup_config"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 04] - Create Backup file
+  file:
+    path: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.txt"
+    state: touch
+    mode: "u=rw,g=rw,o=rw"
+
+- name: INFORMATION - [Step 05] - Retrive config information
+  junos_cli:
+    host: "{{ ansible_host }}"
+    user: "{{ juniper_user }}"
+    passwd: "{{ juniper_passwd }}"
+    cli: "show configuration"
+    dest: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }}.txt"
+    format: text
+
+#- name: Clear Expire Report (Older than 2 week)
+#  shell: "find {{ default_path }}/* -mtime +14"
