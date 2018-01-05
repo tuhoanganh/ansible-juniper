@@ -20,7 +20,7 @@
 
 - name: INFORMATION - [Step 04] - Set file name that need to search
   set_fact:
-    file_name: "Optic.slax123"
+    file_name: "Optic.slax"
   run_once: true
   delegate_to: localhost
 
@@ -53,11 +53,8 @@
     passwd: "{{ juniper_passwd }}"
     cli: "file list /var/db/scripts/event/{{ file_name }}"
     dest: "{{ default_path }}/{{ date_info }}/{{ inventory_hostname }},{{ ansible_host }}.tmp"
-    format: xml
+    format: text
   register: test
-
-- debug:
-    msg: "{{ test }}"
 
 - name: INFORMATION - [Step 08] - Collect all devices version and store into csv file
   shell: "{{ item }}"
@@ -72,8 +69,8 @@
   delegate_to: localhost
   ignore_errors: yes
 
-- name: INFORMATION - [Step 09] - Clear Temp file
-  shell:  "find {{ default_path }}/{{ date_info }}/*.tmp -delete"
-  run_once: true
-  delegate_to: localhost
+#- name: INFORMATION - [Step 09] - Clear Temp file
+#  shell:  "find {{ default_path }}/{{ date_info }}/*.tmp -delete"
+#  run_once: true
+#  delegate_to: localhost
 

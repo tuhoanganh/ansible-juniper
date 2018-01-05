@@ -1,0 +1,12 @@
+---
+- name: CONFIGURATION - [STEP 01] - Pushing Optic.slax script
+  junos_scp_file:
+    host={{ inventory_hostname }}
+    user={{ ansible_user }}
+    passwd={{ ansible_ssh_pass }}
+    local_dir="{{ role_path }}/files"
+    remote_dir="/tmp"
+    type="put"
+    file="Optic.slax"
+#    logfile={{ log }}
+
