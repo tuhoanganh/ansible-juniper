@@ -218,11 +218,11 @@ def main():
     def update_my_progress(dev, report):
         do_log(report)
 
+    type= 'put'
 
     try:
         dev.open()
         remote_path=args['remote_dir']
-        type=args['type']
         local_file=args['local_dir']+"/"+args['file']
         remote_file=args['remote_dir']+"/"+args['file']
         if (type == "put"):
