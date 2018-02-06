@@ -1,0 +1,14 @@
+---
+- name: INFORMATION - [Step 01] - Retrive Juniper Facts
+  junos_get_facts:
+    host: "{{ ansible_host }}"
+    user: "{{ juniper_user }}"
+    passwd: "{{ juniper_passwd }}"
+    savedir: ./files
+  register: router_info
+
+- name: Create the log file for this run
+  shell: /bin/bash -l -c "mv {{ lookup('env', 'HOME') }}/.ansible/log/ansible.log  {{ lookup('env', 'HOME') }}/.ansible/log/ansible.log-{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+  delegate_to: localhost
+  become: yes
+  become_user: "{{ lookup('env', 'USER') }}"

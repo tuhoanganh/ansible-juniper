@@ -6,7 +6,7 @@
 
 - name: INFORMATION - [Step 02] - Create Date directory
   file: 
-    path: "files/backup_config/{{ date_info }}"
+    path: "{{ playbook_dir }}/files/backup_config/{{ date_info }}"
     state: directory
     mode: 0777
   run_once: true

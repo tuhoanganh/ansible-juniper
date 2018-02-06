@@ -1,0 +1,16 @@
+---
+- hosts: all
+  gather_facts: yes
+  connection: local
+#  roles:
+#    - role: check_netconf
+  tasks:
+  - name: INFORMATION - [Step 07] - Searching file in devices
+    junos_cli:
+      host: "{{ ansible_host }}"
+      user: "{{ juniper_user }}"
+      passwd: "{{ juniper_passwd }}"
+      cli: "show chasiss hardware %s match sfp"
+      dest: "{{ ansible_host }}.tmp"
+      format: text
+
