@@ -1,0 +1,9 @@
+---
+
+- name: auto-snapshot - [Step 01]
+  junos_install_config:
+    file: "{{ role_path }}/files/fix_auto_snapshot.set"
+    host: "{{ ansible_ssh_host }}"    # variable is from inventory file
+    user: "{{ juniper_user }}"        # variable is from inventory file
+    passwd: "{{ juniper_passwd }}"    # variable is from inventory file
+    comment: "adding auto-snapshot"

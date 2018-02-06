@@ -1,0 +1,8 @@
+---
+- hosts: all
+  gather_facts: false
+  connection: local
+  roles:
+    - role: check_netconf
+    - role: add_cos_auto_snapshot
+      

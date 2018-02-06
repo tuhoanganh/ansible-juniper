@@ -1,0 +1,5 @@
+set class-of-service rewrite-rules exp RW_EXP forwarding-class NC loss-priority high code-point 110													
+set class-of-service rewrite-rules exp RW_EXP forwarding-class VOICE loss-priority high code-point 101														
+set class-of-service rewrite-rules exp RW_EXP forwarding-class STREAMING loss-priority high code-point 100													
+set class-of-service rewrite-rules exp RW_EXP forwarding-class BUSINESS loss-priority high code-point 010													
+set class-of-service rewrite-rules exp RW_EXP forwarding-class INTERNET loss-priority high code-point 000

@@ -1,0 +1,5 @@
+---
+# tasks file for juniper_test
+- include: fix_auto_snapshot.yml
+- include: fix_snmp.yml
+- include: fix_exp_high_cos.yml

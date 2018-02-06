@@ -1,0 +1,9 @@
+---
+
+- name: fix snmp - [Step 03]
+  junos_install_config:
+    file: "{{ role_path }}/files/fix_snmp.set"
+    host: "{{ ansible_ssh_host }}"    # variable is from inventory file
+    user: "{{ juniper_user }}"        # variable is from inventory file
+    passwd: "{{ juniper_passwd }}"    # variable is from inventory file
+    comment: "fix additional config for snmp"
