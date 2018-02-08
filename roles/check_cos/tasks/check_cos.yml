@@ -1,0 +1,72 @@
+---
+- name: INFORMATION - [Step 01] - Get Date
+  set_fact: date_info="{{lookup('pipe','date +%Y%m%d')}}"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 02] - Set directory for storing the log files
+  set_fact:
+    default_path: "files/check_cos"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 03] - Create report file
+  file:
+    path: "{{ default_path }}/cos_status_{{ date_info }}.csv"
+    state: touch
+    mode: "u=rw,g=rw,o=rw"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 04] - Create Temporary file
+  file:
+    path: "{{ default_path }}/{{ inventory_hostname }}.tmp"
+    state: touch
+    mode: "u=rw,g=rw,o=rw"
+  
+- name: INFORMATION - [Step 05] - Create column name in file
+  lineinfile:
+    dest: "{{ default_path }}/cos_status_{{ date_info }}.csv"
+    line: "Hostname, IP, Forwarding-class, Low, High"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 07] - Write device informations into temporary file
+  lineinfile:
+    dest: "{{ default_path }}/{{ inventory_hostname }}.tmp"
+    line: "{{ inventory_hostname }},{{ ansible_host }}"
+    state: present
+
+- name: INFORMATION - [Step 05] - Get Class of Service Configuration
+  junos_cli:
+    host: "{{ ansible_host }}"
+    user: "{{ juniper_user }}"
+    passwd: "{{ juniper_passwd }}"
+    cli: "show configuration class-of-service rewrite-rules exp {{ class_of_service_name }}"
+    dest: "{{ default_path }}/{{ inventory_hostname }}_cos.tmp"
+    format: text
+
+- name: INFORMATION - [Step 08] - Filter Class of Service Configuration
+  shell: "{{ item }}"
+  with_items:
+     - "cat {{ default_path }}/{{ inventory_hostname }}_cos.tmp | grep 'forwarding-class' | wc -l >> {{ default_path }}/{{ inventory_hostname }}.tmp"
+     - "cat {{ default_path }}/{{ inventory_hostname }}_cos.tmp | grep 'low' | wc -l >> {{ default_path }}/{{ inventory_hostname }}.tmp"
+     - "cat {{ default_path }}/{{ inventory_hostname }}_cos.tmp | grep 'high' | wc -l >> {{ default_path }}/{{ inventory_hostname }}.tmp"
+     - "cat /dev/null > {{ default_path }}/{{ inventory_hostname }}_cos.tmp"
+     - "cat {{ default_path }}/{{ inventory_hostname }}.tmp | tr '\n' ',' > {{ default_path }}/{{ inventory_hostname }}_cos.tmp"
+     - "echo '\n' >> {{ default_path }}/{{ inventory_hostname }}_cos.tmp"
+
+- name: INFORMATION - [Step 09] - Collect all Class of Service Configuration and store into csv file
+  shell: "{{ item }}"
+  with_items:
+     - "sed -i 's/Auto-cos Configuration://g' {{ default_path }}/*_cos.tmp"
+     - "cat {{ default_path }}/*_cos.tmp >> {{ default_path }}/cos_status_{{ date_info }}.csv"
+     - 'sed -i "/^$/d" {{ default_path }}/cos_status_{{ date_info }}.csv'
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 09] - Clear Temp file
+  shell:  "find {{ default_path }}/*.tmp -delete"
+  run_once: true
+  delegate_to: localhost
+

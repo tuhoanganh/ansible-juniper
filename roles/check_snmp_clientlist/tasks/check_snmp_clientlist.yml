@@ -42,7 +42,7 @@
     host: "{{ ansible_host }}"
     user: "{{ juniper_user }}"
     passwd: "{{ juniper_passwd }}"
-    cli: "show configuration snmp client-list server"
+    cli: "show configuration snmp client-list {{ snmp_client_list_name }} "
     dest: "{{ default_path }}/{{ inventory_hostname }}_snmp_clientlist.tmp"
     format: text
 
