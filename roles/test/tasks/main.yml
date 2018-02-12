@@ -1,4 +1,0 @@
----
-# tasks file for juniper_test
-- include: edit_bfd.yml
-
