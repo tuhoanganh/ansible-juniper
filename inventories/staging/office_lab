@@ -1,9 +1,7 @@
 [juniper]
-#juniper_01 ansible_host=192.168.200.10 juniper_user=root juniper_passwd=ABCD1234 ansible_connection=local
-ACX10 ansible_host=10.96.10.110
-ACX6 ansible_host=10.96.10.107
-ACX8 ansible_host=10.96.10.108
-ACX9 ansible_host=10.96.10.109
+lab-vMX-01 ansible_host=10.98.0.121
+lab-vMX-02 ansible_host=10.98.0.122
+lab-vMX-03 ansible_host=10.98.0.123
 
 [all:vars]
 #Variables for connect SSH

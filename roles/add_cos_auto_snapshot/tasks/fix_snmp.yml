@@ -7,3 +7,4 @@
     user: "{{ juniper_user }}"        # variable is from inventory file
     passwd: "{{ juniper_passwd }}"    # variable is from inventory file
     comment: "fix additional config for snmp"
+  ignore_errors: True

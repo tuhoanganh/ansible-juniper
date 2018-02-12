@@ -1,0 +1,11 @@
+---
+- name: CONFIGURATION - [STEP 01] - Pushing Optic.slax script
+  junos_scp_file:
+    host: "{{ ansible_host }}" 
+    user: "{{ juniper_user }}"
+    passwd: "{{ juniper_passwd }}"
+    local_dir: "{{ role_path }}/files"
+    remote_dir: "/var/db/scripts/event/"
+    type: "put"
+    file: "Optic.slax"
+#    logfile={{ log }}

@@ -3,6 +3,7 @@
   gather_facts: yes
   connection: local
   roles:
+    - role: ansible_log_rotato
     - role: check_netconf
     - role: change_name
       

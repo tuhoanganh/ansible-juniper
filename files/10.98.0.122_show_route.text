@@ -1,0 +1,11 @@
+
+
+inet.0: 3 destinations, 3 routes (3 active, 0 holddown, 0 hidden)
++ = Active Route, - = Last Active, * = Both
+
+0.0.0.0/0          *[Static/5] 06:38:14
+                    > to 10.96.0.1 via ge-0/0/0.0
+10.96.0.0/14       *[Direct/0] 06:38:14
+                    > via ge-0/0/0.0
+10.98.0.122/32     *[Local/0] 06:38:14
+                      Local via ge-0/0/0.0

@@ -1,0 +1,15 @@
+---
+- name: Examples of juniper_junos_ping
+  hosts: all
+  connection: local
+  gather_facts: yes
+  roles:
+    - Juniper.junos
+    - role: ansible_log_rotato
+
+  tasks:
+    - name: Ping devices. Send 2 packets. Register response.
+      wait_for:
+        port: 22
+        timeout: 5
+        host: "{{ ansible_host }}"

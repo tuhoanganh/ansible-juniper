@@ -1,0 +1,8 @@
+---
+- hosts: all
+  gather_facts: yes
+  connection: local
+  roles:
+    - role: ansible_log_rotato
+    - role: check_netconf
+    - role: add_optic_script

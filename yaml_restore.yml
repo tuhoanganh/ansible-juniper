@@ -1,0 +1,9 @@
+---
+- hosts: all
+  gather_facts: yes
+  connection: local
+  roles:
+    - role: Juniper.junos
+    - role: ansible_log_rotato
+    - role: check_netconf
+    - role: restore_config

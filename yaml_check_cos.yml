@@ -1,6 +1,7 @@
 ---
 - hosts: all
   gather_facts: yes
+  serial: 100
   connection: local
 
   pre_tasks:
@@ -10,5 +11,6 @@
       delegate_to: localhost
 
   roles:
+    - role: ansible_log_rotato
     - role: check_netconf
     - role: check_cos

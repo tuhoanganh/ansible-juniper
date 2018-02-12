@@ -1,0 +1,9 @@
+---
+- name: INFORMATION - [Step 01] - Restore configuration from backup file
+  juniper_junos_config:
+    load: 'merge'
+    src: "{{ role_path }}/files/ME-CSR-HNI-C88.3.txt"
+    provider:
+      user: "{{ juniper_user }}"
+      passwd: "{{ juniper_passwd }}"
+      host: "{{ ansible_ssh_host }}"
