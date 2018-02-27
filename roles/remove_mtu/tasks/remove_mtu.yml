@@ -8,7 +8,6 @@
 - name: INFORMATION - [STEP 01] - Get configuration with display set
   juniper_junos_command:
     cli: "show configuration | display set"
-    logfile: "cli.log"
     dest: "{{ default_path }}/{{ inventory_hostname }}.mtu_config.tmp"
     format: text
     host: "{{ ansible_host }}" 
