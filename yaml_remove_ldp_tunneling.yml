@@ -1,0 +1,10 @@
+---
+- hosts: all
+  gather_facts: false
+  serial: 100
+  connection: local
+  roles:
+    - role: Juniper.junos
+    - role: ansible_log_rotato
+    - role: check_netconf
+    - role: remove_ldp_tunneling

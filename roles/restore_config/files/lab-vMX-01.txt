@@ -30,7 +30,7 @@ groups {
 }
 apply-groups MTU;
 system {
-    host-name ME-CSR-HNI_CGY-C88.3;
+    host-name ME-CSR-HNI_CGY-C88.1;
     auto-snapshot;
     time-zone Asia/Saigon;
     no-multicast-echo;
@@ -121,12 +121,12 @@ system {
             structured-data;
         }
         time-format year millisecond;
-        source-address 10.98.0.123;
+        source-address 10.98.0.107;
     }
     ntp {
         server 10.248.0.6;
         server 10.248.0.5 prefer;
-        source-address 10.98.0.123;
+        source-address 10.98.0.107;
     }
 }
 chassis {
@@ -258,12 +258,12 @@ interfaces {
     }
     lo0 {
         unit 0 {
-            description ME-CSR-HNI-C88.3-LOOPBACK;
+            description ME-CSR-HNI-C88.1-LOOPBACK;
             family inet {
                 filter {
                     input PROTECT-RE;
                 }
-                address 10.98.0.123/32 {
+                address 10.98.0.107/32 {
                     primary;
                 }
                 address 127.0.0.1/32;
@@ -272,7 +272,7 @@ interfaces {
     }
 }
 snmp {
-    name ME-CSR-HNI-C88.3;
+    name ME-CSR-HNI-C88.1;
     client-list MOBI-NMS {
         10.0.0.0/8;
     }
@@ -281,7 +281,7 @@ snmp {
         client-list-name MOBI-NMS;
     }
     trap-options {
-        source-address 10.98.0.123;
+        source-address 10.98.0.107;
     }
     trap-group MOBIMETRO {
         version v2;
@@ -335,7 +335,7 @@ event-options {
     }
 }
 routing-options {
-    router-id 10.98.0.123;
+    router-id 10.98.0.107;
     autonomous-system 65300;
     forwarding-table {
         export LOAD-BALANCE;
@@ -422,7 +422,7 @@ protocols {
         log-updown;
         group CSR-TO-AGG {
             type internal;
-            local-address 10.98.0.123;
+            local-address 10.98.0.107;
             family inet {
                 unicast;
             }
@@ -1185,7 +1185,7 @@ routing-instances {
     Abis-ER {
         instance-type vrf;
         interface ge-0/0/1.301;
-        route-distinguisher 10.98.0.123:20002;
+        route-distinguisher 10.98.0.107:20002;
         vrf-import Abis-ER-IMPORT;
         vrf-export Abis-ER-EXPORT;
         vrf-table-label;
@@ -1193,7 +1193,7 @@ routing-instances {
     IuB-ER {
         instance-type vrf;
         interface ge-0/0/1.300;
-        route-distinguisher 10.98.0.123:30002;
+        route-distinguisher 10.98.0.107:30002;
         vrf-import IuB-ER-IMPORT;
         vrf-export IuB-ER-EXPORT;
         vrf-table-label;
@@ -1201,7 +1201,7 @@ routing-instances {
     OAM-2G {
         instance-type vrf;
         interface ge-0/0/1.351;
-        route-distinguisher 10.98.0.123:20010;
+        route-distinguisher 10.98.0.107:20010;
         vrf-import OAM-2G-IMPORT;
         vrf-export OAM-2G-EXPORT;
         vrf-table-label;
@@ -1209,7 +1209,7 @@ routing-instances {
     OAM-3G {
         instance-type vrf;
         interface ge-0/0/1.350;
-        route-distinguisher 10.98.0.123:30010;
+        route-distinguisher 10.98.0.107:30010;
         vrf-import OAM-3G-IMPORT;
         vrf-export OAM-3G-EXPORT;
         vrf-table-label;
@@ -1217,7 +1217,7 @@ routing-instances {
     OAM-4G {
         instance-type vrf;
         interface ge-0/0/3.200;
-        route-distinguisher 10.98.0.123:40004;
+        route-distinguisher 10.98.0.107:40004;
         vrf-import OAM-4G-IMPORT;
         vrf-export OAM-4G-EXPORT;
         vrf-table-label;
@@ -1225,7 +1225,7 @@ routing-instances {
     enodeB-4G {
         instance-type vrf;
         interface ge-0/0/3.100;
-        route-distinguisher 10.98.0.123:40001;
+        route-distinguisher 10.98.0.107:40001;
         vrf-import enodeB-4G-IMPORT;
         vrf-export enodeB-4G-EXPORT;
         vrf-table-label;

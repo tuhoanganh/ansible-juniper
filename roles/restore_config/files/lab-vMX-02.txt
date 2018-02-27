@@ -1,0 +1,1233 @@
+
+## Last commit: 2018-02-02 18:58:42 ICT by juniper
+groups {
+    MTU {
+        interfaces {
+            <ae*> {
+                mtu 2000;
+                hold-time up 2000 down 0;
+            }
+            <xe-*> {
+                mtu 2000;
+                hold-time up 2000 down 0;
+                optics-options {
+                    warning low-light-warning {
+                        syslog;
+                    }
+                }
+            }
+            <ge-*> {
+                mtu 2000;
+                hold-time up 2000 down 0;
+                optics-options {
+                    warning low-light-warning {
+                        syslog;
+                    }
+                }
+            }
+        }
+    }
+}
+apply-groups MTU;
+system {
+    host-name ME-CSR-HNI_CGY-C88.2;
+    auto-snapshot;
+    time-zone Asia/Saigon;
+    no-multicast-echo;
+    no-redirects;
+    internet-options {
+        no-source-quench;
+        tcp-drop-synfin-set;
+        no-tcp-reset drop-all-tcp;
+    }
+    root-authentication {
+        encrypted-password "$1$Q8HZQmpt$MpivEfnWzAFsuwCY6Hle6."; ## SECRET-DATA
+    }
+    login {
+        message "\n********************************************************\n*          (Site name: HN_CGY_DUONG_QUANG_HAM_2)          *\n*                 [WARNING]                            *\n*  If you are not authorized to access this system,     *\n* exit immediately. Unauthorized access to this        *\n* system is forbidden by company policies, national,   *\n* and international laws. Unauthorized users are       *\n* subject to criminal and civil penalties as well      *\n* as company initiated disciplinary proceedings.       *\n*                                                      *\n* By entry into this system you acknowledge that you   *\n* are authorized access and the level of privilege you *\n* subsequently execute on this system. You further     *\n* acknowledge that by entry into this system you       *\n* expect no privacy from monitoring.                   *\n********************************************************\n\n";
+        class admin {
+            idle-timeout 10;
+            permissions all;
+        }
+        class viewonly {
+            idle-timeout 10;
+            permissions view;
+        }
+        user juniper {
+            class admin;
+            authentication {
+                encrypted-password "$1$Mem3vMzF$iJNHKlGNZ/lJZXNqsvMDC/"; ## SECRET-DATA
+            }
+        }
+        user mobifone {
+            class admin;
+            authentication {
+                encrypted-password "$1$vKxR0N4l$JB.s/vG4eFh6TzR99bo3Z."; ## SECRET-DATA
+            }
+        }
+        user monitor {
+            class viewonly;
+            authentication {
+                encrypted-password "$1$TpV5Sgvl$52tLrKzCXu.QsgJrLgLwf/"; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ftp;
+        ssh {
+            root-login deny;
+            protocol-version v2;
+            max-sessions-per-connection 32;
+            connection-limit 20;
+        }
+        telnet {
+            connection-limit 20;
+        }
+        netconf {
+            ssh;
+        }
+    }
+    syslog {
+        archive size 2m files 10;
+        user * {
+            any critical;
+        }
+        inactive: host 1.1.1.1 {
+            any notice;
+            daemon any;
+            kernel any;
+            interactive-commands any;
+            facility-override local7;
+            log-prefix ME-CSR-HNI;
+        }
+        file messages {
+            any warning;
+            authorization none;
+            archive world-readable;
+            explicit-priority;
+        }
+        file security {
+            authorization info;
+        }
+        file commands {
+            interactive-commands info;
+        }
+        file firewall-filter-log {
+            firewall any;
+        }
+        file default-log-messages {
+            any info;
+            match "(requested 'commit' operation)|(copying configuration to juniper.save)|(commit complete)|ifAdminStatus|(FRU power)|(FRU removal)|(FRU insertion)|(link UP)|transitioned|Transferred|transfer-file|(license add)|(license delete)|(package -X update)|(package -X delete)|(FRU Online)|(FRU Offline)|(plugged in)|(unplugged)|CFMD_CCM_DEFECT| LFMD_3AH | RPD_MPLS_PATH_BFD|(Master Unchanged, Members Changed)|(Master Changed, Members Changed)|(Master Detected, Members Changed)|(vc add)|(vc delete)|(Master detected)|(Master changed)|(Backup detected)|(Backup changed)|(interface vcp-)|(AIS_DATA_AVAILABLE)";
+            structured-data;
+        }
+        time-format year millisecond;
+        source-address 10.98.0.108;
+    }
+    ntp {
+        server 10.248.0.6;
+        server 10.248.0.5 prefer;
+        source-address 10.98.0.108;
+    }
+}
+chassis {
+    alarm {
+        management-ethernet {
+            link-down ignore;
+        }
+    }
+}
+services {
+    rpm {
+        probe Uplink {
+            test ge-0/0/1 {
+                probe-type icmp-ping;
+                target address 10.248.66.30;
+                probe-count 15;
+                probe-interval 1;
+                test-interval 20;
+                thresholds {
+                    total-loss 3;
+                }
+                hardware-timestamp;
+            }
+            test ge-0/0/2 {
+                probe-type icmp-ping;
+                target address 10.248.66.25;
+                probe-count 15;
+                probe-interval 1;
+                test-interval 20;
+                thresholds {
+                    total-loss 3;
+                }
+                hardware-timestamp;
+            }
+        }
+    }
+}
+interfaces {
+    ge-0/0/1 {
+        apply-groups-except MTU;
+        description TO-NodeB-HN_CGY_DUONG_QUANG_HAM_2;
+        vlan-tagging;
+        unit 300 {
+            description "To IuB-ER Interface";
+            vlan-id 300;
+            family inet {
+                filter {
+                    input QoS-3G;
+                }
+                address 10.13.227.197/30;
+            }
+        }
+        unit 301 {
+            description "To Abis-ER Interface";
+            vlan-id 301;
+            family inet {
+                filter {
+                    input QoS-2G;
+                }
+                address 10.10.29.197/30;
+            }
+        }
+        unit 350 {
+            description "To OAM-3G Interface\n";
+            vlan-id 350;
+            family inet {
+                filter {
+                    input QoS-3G;
+                }
+                address 10.13.228.197/30;
+            }
+        }
+        unit 351 {
+            description "To OAM-2G Interface\n";
+            vlan-id 351;
+            family inet {
+                filter {
+                    input QoS-2G;
+                }
+                address 10.13.229.197/30;
+            }
+        }
+    }
+    ge-0/0/2 {
+        description TO-CSR-C88.2-GE-1/1/1-1G;
+        unit 0 {
+            family inet {
+                address 10.248.66.26/30;
+            }
+            family inet6;
+            family mpls;
+        }
+    }
+    ge-0/0/1 {
+        description TO-CSR-C88.4-GE-1/1/0-1G;
+        unit 0 {
+            vlan-id 0;
+            family inet {
+                address 10.248.66.29/30;
+            }
+            family inet6;
+            family mpls;
+        }
+    }
+    ge-0/0/3 {
+        description TO-ENODEB-4G-HN_CGY_DUONG_QUANG_HAM_2;
+        vlan-tagging;
+        mtu 1618;
+        unit 100 {
+            description TO-ENODEB-4G-S1U-S1C-X2;
+            vlan-id 100;
+            family inet {
+                filter {
+                    input QoS-4G;
+                }
+                address 10.56.5.161/30;
+            }
+        }
+        unit 200 {
+            description TO-ENODEB-4G-OAM;
+            vlan-id 200;
+            family inet {
+                filter {
+                    input QoS-4G;
+                }
+                address 10.56.36.161/30;
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            description ME-CSR-HNI-C88.2-LOOPBACK;
+            family inet {
+                filter {
+                    input PROTECT-RE;
+                }
+                address 10.98.0.108/32 {
+                    primary;
+                }
+                address 127.0.0.1/32;
+            }
+        }
+    }
+}
+snmp {
+    name ME-CSR-HNI-C88.2;
+    client-list MOBI-NMS {
+        10.0.0.0/8;
+    }
+    community MOBIMETRO {
+        authorization read-only;
+        client-list-name MOBI-NMS;
+    }
+    trap-options {
+        source-address 10.98.0.108;
+    }
+    trap-group MOBIMETRO {
+        version v2;
+        categories {
+            authentication;
+            chassis;
+            link;
+            routing;
+            startup;
+            vrrp-events;
+            configuration;
+        }
+    }
+    trap-group space {
+        targets {
+            10.51.16.45;
+        }
+    }
+}
+event-options {
+    max-policies 5;
+    generate-event {
+        1_hours time-interval 3600;
+    }
+    policy record-Optic {
+        events [ snmp_trap_link_down snmp_trap_link_up 1_hours ];
+        attributes-match {
+            snmp_trap_link_down.interface-name matches "ge-0/0/1|ge-0/0/2";
+            snmp_trap_link_up.interface-name matches "ge-0/0/1|ge-0/0/2";
+        }
+        then {
+            event-script Optic.slax;
+        }
+    }
+    policy backup-config-on-commit {
+        events 1_hours;
+        within 3600 events ui_commit_progress;
+        attributes-match {
+            ui_commit_progress.message matches "commit complete";
+        }
+        then {
+            execute-commands {
+                commands {
+                    "request system snapshot slice alternate config-partition";
+                }
+            }
+        }
+    }
+    event-script {
+        file Optic.slax;
+    }
+}
+routing-options {
+    router-id 10.98.0.108;
+    autonomous-system 65300;
+    forwarding-table {
+        export LOAD-BALANCE;
+    }
+}
+protocols {
+    router-advertisement {
+        interface ge-0/0/1.0;
+        interface ge-0/0/2.0;
+    }
+    rsvp {
+        interface ge-0/0/2.0 {
+            authentication-key "$9$VnwgJQz6CA0ikT39pRExNdbs4oaGDHq2gQF"; ## SECRET-DATA
+            aggregate;
+            reliable;
+        }
+        interface ge-0/0/1.0 {
+            authentication-key "$9$oOJDkCA01Ic5Q9pBEeKs24aZjiH.PTzUDCt"; ## SECRET-DATA
+            aggregate;
+            reliable;
+        }
+    }
+    mpls {
+        statistics {
+            file MPLS-LSP-STATS size 1m files 10;
+            interval 300;
+        }
+        log-updown {
+            syslog;
+            trap;
+            trap-path-down;
+            trap-path-up;
+        }
+        admin-groups {
+            ring-color1 1;
+            ring-color2 2;
+            ring-color3 3;
+            ring-color4 4;
+            ring-color5 5;
+            ring-color6 6;
+            ring-color7 7;
+            ring-color8 8;
+            ring-color9 9;
+            ring-color10 10;
+            agg-color1 11;
+            agg-color2 12;
+            agg-color3 13;
+            agg-color4 14;
+            agg-color5 15;
+        }
+        smart-optimize-timer 30;
+        no-propagate-ttl;
+        ipv6-tunneling;
+        icmp-tunneling;
+        optimize-timer 180;
+        label-switched-path CSR-C88.3-TO-AGG-1.2 {
+            to 10.248.0.5;
+            ldp-tunneling;
+            admin-group include-all [ ring-color3 agg-color2 ];
+            adaptive;
+            fast-reroute {
+                hop-limit 20;
+            }
+        }
+        label-switched-path CSR-C88.3-TO-AGG-1.3 {
+            to 10.248.0.6;
+            ldp-tunneling;
+            admin-group include-all [ ring-color3 agg-color2 ];
+            adaptive;
+            fast-reroute {
+                hop-limit 20;
+            }
+        }
+        interface ge-0/0/2.0 {
+            admin-group [ ring-color3 agg-color2 ];
+        }
+        interface ge-0/0/1.0 {
+            admin-group [ ring-color3 agg-color2 ];
+        }
+    }
+    bgp {
+        precision-timers;
+        mtu-discovery;
+        log-updown;
+        group CSR-TO-AGG {
+            type internal;
+            local-address 10.98.0.108;
+            family inet {
+                unicast;
+            }
+            family inet-vpn {
+                unicast;
+            }
+            family inet6-vpn {
+                unicast;
+            }
+            family route-target;
+            authentication-key "$9$FjqxnCuvMXN-wRhK87V4ofTz36AtpO1Ec9CvW"; ## SECRET-DATA
+            bfd-liveness-detection {
+                minimum-interval 500;
+                multiplier 3;
+            }
+            neighbor 10.248.0.5;
+            neighbor 10.248.0.6;
+        }
+    }
+    ospf {
+        traffic-engineering;
+        reference-bandwidth 100g;
+        area 0.0.0.88 {
+            interface lo0.0 {
+                passive;
+            }
+            interface ge-0/0/2.0 {
+                interface-type p2p;
+                metric 200;
+                ldp-synchronization;
+                authentication {
+                    md5 1 key "$9$FjqxnCuvMXN-wRhK87V4ofTz36AtpO1Ec9CvW"; ## SECRET-DATA
+                }
+                bfd-liveness-detection {
+                    minimum-interval 500;
+                    multiplier 3;
+                    full-neighbors-only;
+                }
+            }
+            interface ge-0/0/1.0 {
+                interface-type p2p;
+                metric 200;
+                ldp-synchronization;
+                authentication {
+                    md5 1 key "$9$FjqxnCuvMXN-wRhK87V4ofTz36AtpO1Ec9CvW"; ## SECRET-DATA
+                }
+                bfd-liveness-detection {
+                    minimum-interval 500;
+                    multiplier 3;
+                    full-neighbors-only;
+                }
+            }
+        }
+    }
+    ospf3 {
+        area 0.0.0.0 {
+            interface all;
+        }
+    }
+    ldp {
+        track-igp-metric;
+        deaggregate;
+        interface ge-0/0/2.0;
+        interface ge-0/0/1.0;
+        interface lo0.0;
+    }
+}
+policy-options {
+    policy-statement Abis-ER-EXPORT {
+        term 1 {
+            from protocol [ static direct ];
+            then {
+                community add Abis-ER-SPOKE;
+                community add METRO-PROVINCE;
+                community add METRO-RING;
+                accept;
+            }
+        }
+    }
+    policy-statement Abis-ER-IMPORT {
+        term 1 {
+            from {
+                protocol bgp;
+                community Abis-ER-HUB;
+            }
+            then accept;
+        }
+    }
+    policy-statement IuB-ER-EXPORT {
+        term 1 {
+            from protocol [ static direct ];
+            then {
+                community add IuB-ER-SPOKE;
+                community add METRO-PROVINCE;
+                community add METRO-RING;
+                accept;
+            }
+        }
+    }
+    policy-statement IuB-ER-IMPORT {
+        term 1 {
+            from {
+                protocol bgp;
+                community IuB-ER-HUB;
+            }
+            then accept;
+        }
+    }
+    policy-statement LOAD-BALANCE {
+        term 1 {
+            then {
+                load-balance per-packet;
+            }
+        }
+    }
+    policy-statement OAM-2G-EXPORT {
+        term 1 {
+            from protocol [ static direct ];
+            then {
+                community add OAM-2G-SPOKE;
+                community add METRO-PROVINCE;
+                community add METRO-RING;
+                accept;
+            }
+        }
+    }
+    policy-statement OAM-2G-IMPORT {
+        term 1 {
+            from {
+                protocol bgp;
+                community OAM-2G-HUB;
+            }
+            then accept;
+        }
+    }
+    policy-statement OAM-3G-EXPORT {
+        term 1 {
+            from protocol [ static direct ];
+            then {
+                community add OAM-3G-SPOKE;
+                community add METRO-PROVINCE;
+                community add METRO-RING;
+                accept;
+            }
+        }
+    }
+    policy-statement OAM-3G-IMPORT {
+        term 1 {
+            from {
+                protocol bgp;
+                community OAM-3G-HUB;
+            }
+            then accept;
+        }
+    }
+    policy-statement OAM-4G-EXPORT {
+        term 1 {
+            from protocol [ static direct ];
+            then {
+                community add OAM-4G-SPOKE;
+                community add METRO-PROVINCE;
+                community add METRO-RING;
+                accept;
+            }
+        }
+    }
+    policy-statement OAM-4G-IMPORT {
+        term 1 {
+            from {
+                protocol bgp;
+                community OAM-4G-HUB;
+            }
+            then accept;
+        }
+    }
+    policy-statement enodeB-4G-EXPORT {
+        term 1 {
+            from protocol [ static direct ];
+            then {
+                community add 4G-SPOKE;
+                community add METRO-PROVINCE;
+                community add METRO-RING;
+                accept;
+            }
+        }
+    }
+    policy-statement enodeB-4G-IMPORT {
+        term 1 {
+            from {
+                protocol bgp;
+                community 4G-HUB;
+            }
+            then accept;
+        }
+    }
+    community 4G-HUB members target:131429L:40010;
+    community 4G-SPOKE members target:131429L:40001;
+    community Abis-ER-HUB members target:131429L:20002;
+    community Abis-ER-SPOKE members target:131429L:20022;
+    community IuB-ER-HUB members target:131429L:30002;
+    community IuB-ER-SPOKE members target:131429L:30022;
+    community METRO-PROVINCE members target:131429L:65300;
+    community METRO-RING members target:65300:88;
+    community OAM-2G-HUB members target:131429L:20010;
+    community OAM-2G-SPOKE members target:131429L:20020;
+    community OAM-3G-HUB members target:131429L:30010;
+    community OAM-3G-SPOKE members target:131429L:30020;
+    community OAM-4G-HUB members target:131429L:40004;
+    community OAM-4G-SPOKE members target:131429L:40003;
+}
+class-of-service {
+    classifiers {
+        dscp CL_DSCP {
+            forwarding-class NC {
+                loss-priority low code-points cs6;
+            }
+            forwarding-class VOICE {
+                loss-priority low code-points ef;
+            }
+            forwarding-class STREAMING {
+                loss-priority low code-points af41;
+            }
+            forwarding-class BUSINESS {
+                loss-priority low code-points af21;
+            }
+            forwarding-class INTERNET {
+                loss-priority low code-points be;
+            }
+        }
+        exp CL_EXP {
+            forwarding-class NC {
+                loss-priority low code-points 110;
+            }
+            forwarding-class VOICE {
+                loss-priority low code-points 101;
+            }
+            forwarding-class STREAMING {
+                loss-priority low code-points 100;
+            }
+            forwarding-class BUSINESS {
+                loss-priority low code-points 010;
+            }
+            forwarding-class INTERNET {
+                loss-priority low code-points 000;
+            }
+        }
+        ieee-802.1 CL_802.1p {
+            forwarding-class NC {
+                loss-priority low code-points 110;
+            }
+            forwarding-class VOICE {
+                loss-priority low code-points 101;
+            }
+            forwarding-class STREAMING {
+                loss-priority low code-points 100;
+            }
+            forwarding-class BUSINESS {
+                loss-priority low code-points 010;
+            }
+            forwarding-class INTERNET {
+                loss-priority low code-points 000;
+            }
+        }
+    }
+    host-outbound-traffic {
+        forwarding-class NC;
+        dscp-code-point cs6;
+    }
+    forwarding-classes {
+        class INTERNET queue-num 0;
+        class BUSINESS queue-num 1;
+        class NC queue-num 3;
+        class STREAMING queue-num 4;
+        class VOICE queue-num 2;
+    }
+    system-defaults {
+        classifiers {
+            exp CL_EXP;
+        }
+    }
+    interfaces {
+        ge-* {
+            scheduler-map SCH-MAP;
+        }
+        ge-0/0/2 {
+            scheduler-map SCH-MAP;
+            unit 0 {
+                rewrite-rules {
+                    exp RW_EXP;
+                }
+            }
+            classifiers {
+                dscp CL_DSCP;
+            }
+            rewrite-rules {
+                dscp RW_DSCP;
+            }
+        }
+        ge-0/0/1 {
+            scheduler-map SCH-MAP;
+            unit 0 {
+                rewrite-rules {
+                    exp RW_EXP;
+                }
+            }
+            classifiers {
+                dscp CL_DSCP;
+            }
+            rewrite-rules {
+                dscp RW_DSCP;
+            }
+        }
+    }
+    routing-instances {
+        all {
+            classifiers {
+                exp CL_EXP;
+            }
+        }
+    }
+    rewrite-rules {
+        dscp RW_DSCP {
+            forwarding-class NC {
+                loss-priority low code-point cs6;
+            }
+            forwarding-class VOICE {
+                loss-priority low code-point ef;
+            }
+            forwarding-class STREAMING {
+                loss-priority low code-point af41;
+            }
+            forwarding-class BUSINESS {
+                loss-priority low code-point af21;
+            }
+            forwarding-class INTERNET {
+                loss-priority low code-point be;
+            }
+        }
+        exp RW_EXP {
+            forwarding-class NC {
+                loss-priority low code-point 110;
+                loss-priority high code-point 110;
+            }
+            forwarding-class VOICE {
+                loss-priority low code-point 101;
+                loss-priority high code-point 101;
+            }
+            forwarding-class STREAMING {
+                loss-priority low code-point 100;
+                loss-priority high code-point 100;
+            }
+            forwarding-class BUSINESS {
+                loss-priority low code-point 010;
+                loss-priority high code-point 010;
+            }
+            forwarding-class INTERNET {
+                loss-priority low code-point 000;
+                loss-priority high code-point 000;
+            }
+        }
+        ieee-802.1 RW_802.1p {
+            forwarding-class NC {
+                loss-priority low code-point 110;
+            }
+            forwarding-class VOICE {
+                loss-priority low code-point 101;
+            }
+            forwarding-class STREAMING {
+                loss-priority low code-point 100;
+            }
+            forwarding-class BUSINESS {
+                loss-priority low code-point 010;
+            }
+            forwarding-class INTERNET {
+                loss-priority low code-point 000;
+            }
+        }
+    }
+    scheduler-maps {
+        SCH-MAP {
+            forwarding-class NC scheduler S_NC;
+            forwarding-class INTERNET scheduler S_INTERNET;
+            forwarding-class BUSINESS scheduler S_BUSINESS;
+            forwarding-class STREAMING scheduler S_STREAMING;
+            forwarding-class VOICE scheduler S_VOICE;
+        }
+    }
+    schedulers {
+        S_NC {
+            transmit-rate percent 5;
+            buffer-size percent 5;
+            priority low;
+        }
+        S_VOICE {
+            transmit-rate percent 20;
+            buffer-size percent 20;
+            priority strict-high;
+        }
+        S_STREAMING {
+            transmit-rate percent 20;
+            buffer-size percent 20;
+            priority low;
+        }
+        S_BUSINESS {
+            transmit-rate percent 20;
+            buffer-size percent 20;
+            priority low;
+        }
+        S_INTERNET {
+            transmit-rate {
+                remainder;
+            }
+            buffer-size {
+                remainder;
+            }
+            priority low;
+        }
+    }
+}
+firewall {
+    family inet {
+        filter PROTECT-RE {
+            term SSH-IN {
+                from {
+                    source-address {
+                        10.0.0.0/8;
+                    }
+                    protocol tcp;
+                    destination-port ssh;
+                }
+                then {
+                    policer SSH_POLICER;
+                    accept;
+                }
+            }
+            term SSH-OUT {
+                from {
+                    source-address {
+                        10.0.0.0/8;
+                    }
+                    protocol tcp;
+                    source-port ssh;
+                }
+                then {
+                    policer SSH_POLICER;
+                    accept;
+                }
+            }
+            term TELNET-IN {
+                from {
+                    source-address {
+                        10.0.0.0/8;
+                    }
+                    protocol tcp;
+                    destination-port telnet;
+                }
+                then {
+                    policer TELNET_POLICER;
+                    accept;
+                }
+            }
+            term TELNET-OUT {
+                from {
+                    source-address {
+                        10.0.0.0/8;
+                    }
+                    protocol tcp;
+                    source-port telnet;
+                }
+                then {
+                    policer TELNET_POLICER;
+                    accept;
+                }
+            }
+            term BGP {
+                from {
+                    protocol tcp;
+                    destination-port bgp;
+                }
+                then accept;
+            }
+            term OSPF {
+                from {
+                    protocol ospf;
+                }
+                then accept;
+            }
+            term DHCPRELAY {
+                from {
+                    protocol udp;
+                    destination-port bootps;
+                }
+                then accept;
+            }
+            term LDP-IN {
+                from {
+                    protocol [ tcp udp ];
+                    destination-port ldp;
+                }
+                then accept;
+            }
+            term LDP-OUT {
+                from {
+                    protocol [ tcp udp ];
+                    source-port ldp;
+                }
+                then accept;
+            }
+            term RSVP {
+                from {
+                    protocol rsvp;
+                }
+                then accept;
+            }
+            term PIM {
+                from {
+                    protocol pim;
+                }
+                then accept;
+            }
+            term IGMP {
+                from {
+                    protocol igmp;
+                }
+                then accept;
+            }
+            term BFD {
+                from {
+                    protocol udp;
+                    destination-port [ 3784 4784 ];
+                }
+                then accept;
+            }
+            term MPLS-TRACE {
+                from {
+                    protocol udp;
+                    destination-port 3503;
+                }
+                then accept;
+            }
+            term SNMP {
+                from {
+                    source-address {
+                        10.0.0.0/8;
+                    }
+                    protocol udp;
+                    destination-port snmp;
+                }
+                then accept;
+            }
+            term SYSLOG {
+                from {
+                    source-address {
+                        10.0.0.0/8;
+                    }
+                    protocol udp;
+                    destination-port syslog;
+                }
+                then accept;
+            }
+            term NTP-IN {
+                from {
+                    source-address {
+                        10.0.0.0/8;
+                    }
+                    protocol udp;
+                    destination-port ntp;
+                }
+                then {
+                    policer NTP_POLICER;
+                    accept;
+                }
+            }
+            term NTP-OUT {
+                from {
+                    source-address {
+                        10.0.0.0/8;
+                    }
+                    protocol udp;
+                    source-port ntp;
+                }
+                then {
+                    policer NTP_POLICER;
+                    accept;
+                }
+            }
+            term ICMP {
+                from {
+                    source-address {
+                        10.0.0.0/8;
+                    }
+                    protocol icmp;
+                }
+                then accept;
+            }
+            term NMS {
+                from {
+                    source-address {
+                        10.0.0.0/8;
+                    }
+                    destination-port [ snmp snmptrap 830 ];
+                }
+                then accept;
+            }
+            term FTP {
+                from {
+                    source-address {
+                        10.0.0.0/8;
+                    }
+                    protocol tcp;
+                    destination-port [ ftp ftp-data ];
+                }
+                then {
+                    policer FTP_POLICER;
+                    accept;
+                }
+            }
+            term DISCARD {
+                then {
+                    discard;
+                }
+            }
+        }
+        filter QoS-4G {
+            term EF {
+                from {
+                    dscp ef;
+                }
+                then {
+                    forwarding-class VOICE;
+                    accept;
+                }
+            }
+            term STREAM {
+                from {
+                    dscp [ af41 af31 af32 ];
+                }
+                then {
+                    forwarding-class STREAMING;
+                    accept;
+                }
+            }
+            term BUSINESS {
+                from {
+                    dscp [ af21 af22 af11 ];
+                }
+                then {
+                    forwarding-class BUSINESS;
+                    accept;
+                }
+            }
+            term BE {
+                from {
+                    dscp be;
+                }
+                then {
+                    forwarding-class INTERNET;
+                    accept;
+                }
+            }
+            term FINAL {
+                then accept;
+            }
+        }
+        filter QoS-2G {
+            term EF {
+                from {
+                    dscp ef;
+                }
+                then {
+                    forwarding-class VOICE;
+                    accept;
+                }
+            }
+            term NC {
+                from {
+                    dscp af41;
+                }
+                then {
+                    forwarding-class NC;
+                    accept;
+                }
+            }
+            term BE {
+                from {
+                    dscp [ af21 be ];
+                }
+                then {
+                    forwarding-class INTERNET;
+                    accept;
+                }
+            }
+            term FINAL {
+                then accept;
+            }
+        }
+        filter QoS-3G {
+            term EF {
+                from {
+                    dscp ef;
+                }
+                then {
+                    forwarding-class VOICE;
+                    accept;
+                }
+            }
+            term STREAMING {
+                from {
+                    dscp af41;
+                }
+                then {
+                    forwarding-class STREAMING;
+                    accept;
+                }
+            }
+            term BE {
+                from {
+                    dscp [ af21 be ];
+                }
+                then {
+                    forwarding-class INTERNET;
+                    accept;
+                }
+            }
+            term FINAL {
+                then accept;
+            }
+        }
+    }
+    policer NTP_POLICER {
+        if-exceeding {
+            bandwidth-limit 500k;
+            burst-size-limit 15k;
+        }
+        then discard;
+    }
+    policer SSH_POLICER {
+        if-exceeding {
+            bandwidth-limit 5m;
+            burst-size-limit 128k;
+        }
+        then discard;
+    }
+    policer TELNET_POLICER {
+        if-exceeding {
+            bandwidth-limit 5m;
+            burst-size-limit 128k;
+        }
+        then discard;
+    }
+    policer FTP_POLICER {
+        if-exceeding {
+            bandwidth-limit 20m;
+            burst-size-limit 625k;
+        }
+        then discard;
+    }
+}
+routing-instances {
+    Abis-ER {
+        instance-type vrf;
+        interface ge-0/0/1.301;
+        route-distinguisher 10.98.0.108:20002;
+        vrf-import Abis-ER-IMPORT;
+        vrf-export Abis-ER-EXPORT;
+        vrf-table-label;
+    }
+    IuB-ER {
+        instance-type vrf;
+        interface ge-0/0/1.300;
+        route-distinguisher 10.98.0.108:30002;
+        vrf-import IuB-ER-IMPORT;
+        vrf-export IuB-ER-EXPORT;
+        vrf-table-label;
+    }
+    OAM-2G {
+        instance-type vrf;
+        interface ge-0/0/1.351;
+        route-distinguisher 10.98.0.108:20010;
+        vrf-import OAM-2G-IMPORT;
+        vrf-export OAM-2G-EXPORT;
+        vrf-table-label;
+    }
+    OAM-3G {
+        instance-type vrf;
+        interface ge-0/0/1.350;
+        route-distinguisher 10.98.0.108:30010;
+        vrf-import OAM-3G-IMPORT;
+        vrf-export OAM-3G-EXPORT;
+        vrf-table-label;
+    }
+    OAM-4G {
+        instance-type vrf;
+        interface ge-0/0/3.200;
+        route-distinguisher 10.98.0.108:40004;
+        vrf-import OAM-4G-IMPORT;
+        vrf-export OAM-4G-EXPORT;
+        vrf-table-label;
+    }
+    enodeB-4G {
+        instance-type vrf;
+        interface ge-0/0/3.100;
+        route-distinguisher 10.98.0.108:40001;
+        vrf-import enodeB-4G-IMPORT;
+        vrf-export enodeB-4G-EXPORT;
+        vrf-table-label;
+    }
+}

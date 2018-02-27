@@ -1,0 +1,35 @@
+---
+- name: INFORMATION - [Step 02] - Set directory for storing the temp and configuration files
+  set_fact:
+    default_path: "files/remove_mtu/"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [STEP 01] - Get configuration with display set
+  juniper_junos_command:
+    cli: "show configuration | display set"
+    logfile: "cli.log"
+    dest: "{{ default_path }}/{{ inventory_hostname }}.mtu_config.tmp"
+    format: text
+    host: "{{ ansible_host }}" 
+    user: "{{ juniper_user }}"
+    passwd: "{{ juniper_passwd }}"
+
+- name: INFORMATION - [Step 02] - Create Remove MTU command 
+  shell: "cat {{ default_path }}/{{ inventory_hostname }}.mtu_config.tmp  |grep mtu | grep 'set interfaces' | sed -e 's/set/delete/' > {{ default_path }}/{{ inventory_hostname }}.remove_mtu_command.set"
+
+- name: CONFIGURATION - [Step 03] - Remove MTU on devices 
+  juniper_junos_config:
+    load: 'merge'
+    src: "{{ default_path }}/{{ inventory_hostname }}.remove_mtu_command.set"
+    host: "{{ ansible_host }}"    # variable is from inventory file
+    user: "{{ juniper_user }}"        # variable is from inventory file
+    passwd: "{{ juniper_passwd }}"    # variable is from inventory file
+    commit: true
+    comment: "Remove MTU - by ansible"
+
+- name: INFORMATION - [Step 04] - Clear Temp file
+  shell:  "find {{ default_path }}/*.tmp -delete"
+  run_once: true
+  delegate_to: localhost
+
