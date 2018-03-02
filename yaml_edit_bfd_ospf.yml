@@ -1,6 +1,6 @@
 ---
 - hosts: all
-  gather_facts: yes
+  gather_facts: false
   serial: 100
   connection: local
   vars_prompt:
@@ -12,12 +12,18 @@
       private: yes
 
   pre_tasks:
-    - name: "VARIABLES - Set variable for Class of Service name"
-      set_fact: class_of_service_name="RW_EXP"
+    - name: "VARIABLES - Set Old minimum-interval value"
+      set_fact: old_interval="500"
+      run_once: true
+      delegate_to: localhost
+
+    - name: "VARIABLES - Set New minimum-interval value"
+      set_fact: new_interval="100"
       run_once: true
       delegate_to: localhost
 
   roles:
+    - role: Juniper.junos
     - role: ansible_log_rotato
     - role: check_netconf
-    - role: check_cos
+    - role: edit_bfd_ospf

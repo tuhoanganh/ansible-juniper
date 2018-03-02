@@ -1,7 +1,7 @@
 ---
 - name: INFORMATION - [Step 01] - Set directory for storing the temp and configuration files
   set_fact:
-    default_path: "files/remove_ldp_tunneling/"
+    default_path: "files/edit_bfd_ospf/"
   run_once: true
   delegate_to: localhost
 
@@ -14,22 +14,22 @@
     user: "{{ juniper_user }}"
     passwd: "{{ juniper_passwd }}"
 
-- name: INFORMATION - [Step 03] - Create Remove ldp-tunneling remove command 
-  shell: "cat {{ default_path }}/{{ inventory_hostname }}.config.tmp |grep ldp-tunneling |grep 'set protocols mpls label-switched-path' | sed -e 's/set/delete/' > {{ default_path }}/{{ inventory_hostname }}.remove_ldp_tunneling_command.set"
+- name: INFORMATION - [Step 03] - Create Edit bfd ospf remove command 
+  shell: "cat {{ default_path }}/{{ inventory_hostname }}.config.tmp | grep 'bfd-liveness-detection minimum-interval' | grep 'set protocols ospf area' | sed -e 's/{{ old_interval }}/{{ new_interval }}/' > {{ default_path }}/{{ inventory_hostname }}.edit_bfd_ospf_command.set"
 
-- name: CONFIGURATION - [Step 04] - Remove ldp-tunneling on devices 
+- name: CONFIGURATION - [Step 04] - Edit bfd ospf on devices 
   juniper_junos_config:
-    load: 'merge'
-    src: "{{ default_path }}/{{ inventory_hostname }}.remove_ldp_tunneling_command.set"
+    load: 'set'
+    src: "{{ default_path }}/{{ inventory_hostname }}.edit_bfd_ospf_command.set"
     host: "{{ ansible_host }}"    # variable is from inventory file
     user: "{{ juniper_user }}"        # variable is from inventory file
     passwd: "{{ juniper_passwd }}"    # variable is from inventory file
     commit: true
-    comment: "Remove ldp-tunneling - by ansible"
+    comment: "Edit bfd ospf - by ansible"
 
 - name: INFORMATION - [Step 05] - Clear Temp file
-  shell:  "find {{ default_path }}/*.tmp -delete"
-  with items:
+  shell:  "{{ item  }}"
+  with_items:
     - "find {{ default_path }}/*.tmp -delete"
     - "find {{ default_path }}/*.set -delete"
   run_once: true

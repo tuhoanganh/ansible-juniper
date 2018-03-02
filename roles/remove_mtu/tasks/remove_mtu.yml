@@ -8,14 +8,14 @@
 - name: INFORMATION - [STEP 01] - Get configuration with display set
   juniper_junos_command:
     cli: "show configuration | display set"
-    dest: "{{ default_path }}/{{ inventory_hostname }}.mtu_config.tmp"
+    dest: "{{ default_path }}/{{ inventory_hostname }}.config.tmp"
     format: text
     host: "{{ ansible_host }}" 
     user: "{{ juniper_user }}"
     passwd: "{{ juniper_passwd }}"
 
 - name: INFORMATION - [Step 02] - Create Remove MTU command 
-  shell: "cat {{ default_path }}/{{ inventory_hostname }}.mtu_config.tmp  |grep mtu | grep 'set interfaces' | sed -e 's/set/delete/' > {{ default_path }}/{{ inventory_hostname }}.remove_mtu_command.set"
+  shell: "cat {{ default_path }}/{{ inventory_hostname }}.config.tmp  |grep mtu | grep 'set interfaces' | sed -e 's/set/delete/' > {{ default_path }}/{{ inventory_hostname }}.remove_mtu_command.set"
 
 - name: CONFIGURATION - [Step 03] - Remove MTU on devices 
   juniper_junos_config:
@@ -29,6 +29,9 @@
 
 - name: INFORMATION - [Step 04] - Clear Temp file
   shell:  "find {{ default_path }}/*.tmp -delete"
+  with_items:
+    - "find {{ default_path }}/*.tmp -delete"
+    - "find {{ default_path }}/*.set -delete"
   run_once: true
   delegate_to: localhost
 

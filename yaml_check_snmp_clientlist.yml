@@ -3,6 +3,13 @@
   gather_facts: yes
   serial: 100
   connection: local
+  vars_prompt:
+    - name: juniper_user
+      prompt: User
+      private: no
+    - name: juniper_passwd
+      prompt: Password
+      private: yes
 
   pre_tasks:
     - name: "VARIABLES - Set variable for SNMP Clientlist Name"
