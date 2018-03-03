@@ -1,11 +1,10 @@
 ---
-- name: CONFIGURATION - [STEP 01] - Set SNMP Name
-  junos_config:
-#    backup: true
+- name: INFORMATION - [STEP 02] - Set SNMP Name
+  juniper_junos_config:
+    load: "merge"
     lines:
-      - set snmp name "{{ inventory_hostname }}"
-    comment: update config
-    provider:
-      username: "{{ juniper_user }}"
-      password: "{{ juniper_passwd }}"
-      host: "{{ ansible_ssh_host }}"
+      - "set snmp name {{ hostname }}---{{ sitename }}"
+    host: "{{ ansible_host }}" 
+    user: "{{ juniper_user }}"
+    passwd: "{{ juniper_passwd }}"
+    comment: "Set SNMP name - by Ansible"
