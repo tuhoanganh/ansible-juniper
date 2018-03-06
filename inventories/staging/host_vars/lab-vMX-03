@@ -1,12 +1,6 @@
 hostname: ME-CSR-HNI-C88.3
 sitename: HN_CGY_DUONG_QUANG_HAM_2
-# Left device
-src_port_left: ge-0/0/1
-dest_hostname_left: ME-CSR-HNI-C88.2
-dest_sitename_left: HN_CGY_VIEN_DAU_KHI_IBC
-dest_port_left: ge-1/1/1
-# Right device
-src_port_right: ge-0/0/2
-dest_hostname_right: ME-CSR-HNI-C88.4
-dest_sitename_right: HN_CGY_DTM_DICH_VONG
-dest_port_right: ge-1/1/0
+
+interfaces_description:
+  - { src_port: ge-0/0/1, dest_hostname: ME-CSR-HNI-C88.2, dest_sitename: HN_CGY_VIEN_DAU_KHI_IBC, dest_port: ge-1/1/1 }
+  - { src_port: ge-0/0/2, dest_hostname: ME-CSR-HNI-C88.4, dest_sitename: HN_CGY_DTM_DICH_VONG, dest_port: ge-1/1/0 }

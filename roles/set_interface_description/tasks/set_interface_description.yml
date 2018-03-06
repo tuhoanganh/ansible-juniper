@@ -1,18 +1,13 @@
 ---
-- name: INFORMATION - [Step 01] - Set directory for storing the temp and configuration files
-  set_fact:
-    default_path: "files/remove_ldp_tunneling/"
-  run_once: true
-  delegate_to: localhost
-
-- name: INFORMATION - [STEP 02] - Set interfaces description (left, right)
+- name: INFORMATION - [STEP 01] - Set interfaces description
   juniper_junos_config:
     load: "merge"
-    lines:
-      - "set interfaces {{ src_port_left }} description TO-{{ dest_hostname_left }}---{{ dest_sitename_left }}---{{ dest_port_left }}"
-      - "set interfaces {{ src_port_right }} description TO-{{ dest_hostname_right }}---{{ dest_sitename_right }}---{{ dest_port_right }}"
+    lines: 
+      - "set interfaces {{ item.src_port }} description TO-{{ item.dest_hostname }}---{{ item.dest_sitename }}---{{ item.dest_port }}"
     host: "{{ ansible_host }}" 
     user: "{{ juniper_user }}"
     passwd: "{{ juniper_passwd }}"
     comment: "Set Interfaces description - by Ansible"
+  with_items:
+    - "{{ interfaces_description }}"
 

@@ -1,7 +1,7 @@
 ---
 - hosts: all
-  gather_facts: false
-  serial: 1
+  gather_facts: true
+  serial: 100
   connection: local
   vars_prompt:
     - name: juniper_user
