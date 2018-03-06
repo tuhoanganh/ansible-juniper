@@ -1,7 +1,7 @@
 ---
 - hosts: all
   serial: 50
-  gather_facts: yes
+  gather_facts: no
   connection: local
   roles:
     - role: Juniper.junos

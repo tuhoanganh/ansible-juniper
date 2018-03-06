@@ -2,7 +2,7 @@
 - name: Examples of juniper_junos_ping
   hosts: all
   connection: local
-  gather_facts: yes
+  gather_facts: no
   roles:
     - Juniper.junos
     - role: ansible_log_rotato

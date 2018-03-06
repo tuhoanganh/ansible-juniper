@@ -1,6 +1,6 @@
 - hosts: all
   serial: 100
-  gather_facts: yes
+  gather_facts: no
   connection: local
   roles:
     - role: ansible_log_rotato

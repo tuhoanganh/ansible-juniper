@@ -1,6 +1,6 @@
 ---
 - hosts: all
-  gather_facts: yes
+  gather_facts: no
   connection: local
   vars_prompt:
     - name: juniper_user
