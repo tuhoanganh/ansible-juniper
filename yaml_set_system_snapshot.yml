@@ -1,0 +1,17 @@
+---
+- hosts: all
+  gather_facts: no
+  serial: 100
+  connection: local
+  vars_prompt:
+    - name: juniper_user
+      prompt: User
+      private: no
+    - name: juniper_passwd
+      prompt: Password
+      private: yes
+  roles:
+    - role: Juniper.junos
+    - role: ansible_log_rotato
+    - role: check_netconf
+    - role: set_system_snapsnot
