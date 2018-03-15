@@ -1,0 +1,10 @@
+---
+- name: CONFIGURATION - [Step 01] - Set Syslog avoid RPM & Script on devices 
+  juniper_junos_config:
+    load: 'merge'
+    lines: 'set system syslog file messages match "!(.*rmopd.*)|(.*UI_JUNOSCRIPT_CMD.*)|(.*UI_NETCONF_CMD.*)"'
+    host: "{{ ansible_host }}"    # variable is from inventory file
+    user: "{{ juniper_user }}"        # variable is from inventory file
+    passwd: "{{ juniper_passwd }}"    # variable is from inventory file
+    commit: true
+    comment: "Config Syslog avoid RPM & Script - by ansible"

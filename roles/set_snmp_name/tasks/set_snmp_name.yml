@@ -1,5 +1,5 @@
 ---
-- name: INFORMATION - [STEP 02] - Set SNMP Name
+- name: CONFIGURATION - [STEP 02] - Set SNMP Name
   juniper_junos_config:
     load: "merge"
     lines:
