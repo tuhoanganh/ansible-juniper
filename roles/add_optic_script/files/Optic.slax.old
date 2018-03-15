@@ -1,0 +1,252 @@
+/*
+ * Version		 : 2.1 - Viettel only
+ * Last Modified : 28-Dec-2018
+ * Platform		: all
+ * Release		 : 12.7 and above
+ * changelog		: tu.doan: modify to support et and ge - modify to change threshold
+ * changelog		: tu.doan: separate OID for RX/TX/Threshold
+ * changelog		: tu.doan: Hold 5 minutes before executing (let routing finish converging)
+ 
+ * Description	 : This event script automatically writes the receive optic laser
+ * levels into the Utility MIB every thirty seconds.
+ * 1.3.6.1.4.1.2636.3.47.1.1.5.1.2
+ */
+version 1.0;
+
+ns junos = "http://xml.juniper.net/junos/*/junos";
+ns xnm = "http://xml.juniper.net/xnm/1.1/xnm";
+ns jcs = "http://xml.juniper.net/junos/commit-scripts/1.0";
+
+import "../import/junos.xsl";
+
+
+var $connection = jcs:open();
+match / {
+	
+	
+	expr jcs:syslog(25,"Optic.slax: Time interval is up OR detected link down/up --- Waiting 5 minutes before running script");
+	
+	expr jcs:sleep(300);
+	<event-script-results>{
+		
+		
+		expr jcs:syslog(25,"Optic.slax: Clearing old value from SNMP database");
+		var $optic_value_snmp_util_object_name = "jnxUtilStringValue" _ ".79.112.116.105.99.46";
+		var $rx_int_snmp_util_object_name = "jnxUtilIntegerValue" _ ".82.88.46";
+		var $tx_int_snmp_util_object_name = "jnxUtilIntegerValue" _ ".84.88.46";
+		var $rx_warn_int_snmp_util_object_name = "jnxUtilIntegerValue" _ ".82.120.65.108.97.114.109.46";
+		var $rx_alarm_int_snmp_util_object_name = "jnxUtilIntegerValue" _ ".82.120.87.97.114.110.46";
+		
+		call CLEAR_RPC($snmp_util_object_name  = $optic_value_snmp_util_object_name, $snmp_util_object_type = "string" );
+		call CLEAR_RPC($snmp_util_object_name  = $rx_int_snmp_util_object_name, $snmp_util_object_type = "integer" );
+		call CLEAR_RPC($snmp_util_object_name  = $tx_int_snmp_util_object_name, $snmp_util_object_type = "integer" );
+		call CLEAR_RPC($snmp_util_object_name  = $rx_warn_int_snmp_util_object_name, $snmp_util_object_type = "integer" );
+		call CLEAR_RPC($snmp_util_object_name  = $rx_alarm_int_snmp_util_object_name, $snmp_util_object_type = "integer" );
+		
+		
+		expr jcs:syslog(25,"Optic.slax: Writing optic info for GE/XE interfaces");
+		var $intf_optics=jcs:execute( $connection, "get-interface-optics-diagnostics-information" );
+		for-each( $intf_optics/physical-interface[(starts-with(name, 'ge-')) or (starts-with(name, 'xe-'))]){
+			var $interface_name		=	name;		
+			
+			
+			var $result= {call SET_1G_10GE_INSTANCE( $interface=$interface_name);}
+		
+		}
+		
+		expr jcs:syslog(25,"Optic.slax: Writing optic info for ET interfaces");
+		for-each( $intf_optics/physical-interface[(starts-with(name, 'et-'))]){
+			var $interface_name		=	name;		
+			
+			
+			var $result= {call SET_100G_INSTANCE( $interface=$interface_name);}
+		
+		}
+		expr jcs:close( $connection );
+		
+		expr jcs:syslog(25,"Optic.slax: finished executing");
+	}
+}
+
+/*
+ * set_instance - Sets the instance in the MIB
+ */
+template CLEAR_RPC($snmp_util_object_name, $snmp_util_object_type ) {
+	var $walk_rpc = {
+		<walk-snmp-object> {
+			<snmp-object-name> $snmp_util_object_name;
+		}
+	}
+	var $mib_objects =jcs:execute($connection,$walk_rpc);
+	
+	if (not(jcs:empty($mib_objects))){
+		for-each( $mib_objects/snmp-object){
+			var $old_instance=index/index-value;
+			var $clear_rpc = {
+				<request-snmp-utility-mib-clear> {
+					<instance> $old_instance;
+					<object-type> $snmp_util_object_type;
+				}
+			}
+			var $results = jcs:execute( $connection, $clear_rpc );
+		}
+	}
+}
+
+/*
+ * set_instance - Sets the instance in the MIB
+ */
+template SET_1G_10GE_INSTANCE($interface) {
+
+	var $rx_1G_10G={
+		if ( optics-diagnostics/rx-signal-avg-optical-power-dbm ) {
+			expr optics-diagnostics/rx-signal-avg-optical-power-dbm;
+		}
+		else if (optics-diagnostics/laser-rx-optical-power-dbm ){
+			expr optics-diagnostics/laser-rx-optical-power-dbm;
+		}
+		else {
+			expr "0.0000";
+		}
+	}
+	var $tx_1G_10G						=	optics-diagnostics/laser-output-power-dbm;
+	var $real_rx_alarm_threshold_1g_10g	=	optics-diagnostics/laser-rx-power-low-alarm-threshold-dbm;
+	var $real_rx_warn_threshold_1g_10g	=	optics-diagnostics/laser-rx-power-low-warn-threshold-dbm;
+	
+	call SET_OPTIC_INSTANCES($interface,
+							 $rx = $rx_1G_10G, 
+							 $tx = $tx_1G_10G,
+							 $real_rx_warn_threshold = $real_rx_alarm_threshold_1g_10g,
+							 $real_rx_alarm_threshold = $real_rx_warn_threshold_1g_10g);
+}
+
+
+template SET_100G_INSTANCE($interface ) {
+
+	var $rx_100G={
+		if (optics-diagnostics/optics-diagnostics-lane-values/laser-rx-optical-power-dbm ){
+			expr optics-diagnostics/optics-diagnostics-lane-values/laser-rx-optical-power-dbm;
+		}
+		else {
+			expr "0.0000";
+		}
+	}
+	
+	var $real_rx_alarm_threshold_100G	=	optics-diagnostics/laser-rx-power-low-alarm_threshold-dbm;
+	var $real_rx_warn_threshold_100G	=	optics-diagnostics/laser-rx-power-low-warn_threshold-dbm;
+	var $tx_100G						=	optics-diagnostics/optics-diagnostics-lane-values/laser-output-power-dbm;
+	
+	
+	call SET_OPTIC_INSTANCES($interface,
+							 $rx = $rx_100G, 
+							 $tx = $tx_100G,
+							 $real_rx_warn_threshold = $real_rx_alarm_threshold_100G,
+							 $real_rx_alarm_threshold = $real_rx_warn_threshold_100G);
+}
+
+template SET_OPTIC_INSTANCES($interface,$rx,$tx,$real_rx_warn_threshold,$real_rx_alarm_threshold){
+
+	mvar $rx_alarm="OK";
+	mvar $real_threshold = 0;
+	mvar $custom_threshold = 0;
+	
+	mvar $custom_rx_alarm_threshold	=	$real_rx_alarm_threshold + 3;
+	mvar $custom_rx_warn_threshold	=	$real_rx_warn_threshold + 3;
+	
+	/*set alarm flag base con comparision result*/
+	if (		($rx < $custom_rx_alarm_threshold ) or ($rx == $custom_rx_alarm_threshold)){
+		set $rx_alarm="CRITICAL";
+		set $real_threshold = $real_rx_alarm_threshold;
+		set $custom_threshold = $custom_rx_alarm_threshold;
+	}
+	else if (	($rx < $custom_rx_warn_threshold) or ($rx == $custom_rx_warn_threshold)){
+		set $rx_alarm="WARNING";
+		set $real_threshold = $real_rx_warn_threshold;
+		set $custom_threshold = $custom_rx_warn_threshold;
+	}
+	else {
+		set $rx_alarm="OK";
+		set $real_threshold = $real_rx_warn_threshold;
+		set $custom_threshold = $custom_rx_warn_threshold;
+	}
+	
+	/*create text instance name and value*/
+	var $optic_value			=	$rx_alarm _ "/Rx:" _ $rx _ "/Tx:" _ $tx _ "/Threshold:" _ $custom_threshold _ "/RealThreshold:" _ $real_threshold;
+	var $optic_value_instance	=	"Optic."_ $interface;
+	
+	
+	/*write text instance */
+	var $optic_value_rpc = {
+		<request-snmp-utility-mib-set> {
+			<instance> $optic_value_instance;
+			<object-type> "string";
+			<object-value> $optic_value;
+		}
+	}
+	
+	expr jcs:execute($connection,$optic_value_rpc);
+	
+	/*create integer instances name and value*/
+	mvar $rx_int		=	$rx * 100;
+	var $rx_int_instance	=	"RX."_ $interface;
+
+	mvar $tx_int		=	$tx * 100;
+	var $tx_int_instance	=	"TX."_ $interface;
+	
+	mvar $rx_warn_int		=	$real_rx_warn_threshold * 100;
+	var $rx_warn_int_instance	=	"RxWarn."_ $interface;
+	
+	mvar $rx_alarm_int		=	$real_rx_alarm_threshold * 100;
+	var $rx_alarm_int_instance	=	"RxAlarm."_ $interface;
+
+
+	/*for Viettel only */
+	if	($rx_int < 0){
+		set $rx_int = $rx_int * -1;
+	}
+	if	($tx_int < 0){
+		set $tx_int = $tx_int * -1;
+	}
+	if	($rx_warn_int < 0){
+		set $rx_warn_int = $rx_warn_int * -1;
+	}
+	if	($rx_alarm_int < 0){
+		set $rx_alarm_int = $rx_alarm_int * -1;
+	}
+
+	/*write integer instances */
+	var $rx_int_rpc = {
+		<request-snmp-utility-mib-set> {
+			<instance> $rx_int_instance;
+			<object-type> "integer";
+			<object-value> $rx_int;
+		}
+	}
+	var $tx_int_rpc = {
+		<request-snmp-utility-mib-set> {
+			<instance> $tx_int_instance;
+			<object-type> "integer";
+			<object-value> $tx_int;
+		}
+	}
+	var $rx_warn_int_rpc = {
+		<request-snmp-utility-mib-set> {
+			<instance> $rx_warn_int_instance;
+			<object-type> "integer";
+			<object-value> $rx_warn_int;
+		}
+	}
+	var $rx_alarm_int_rpc = {
+		<request-snmp-utility-mib-set> {
+			<instance> $rx_alarm_int_instance;
+			<object-type> "integer";
+			<object-value> $rx_alarm_int;
+		}
+	}
+	expr jcs:execute($connection,$rx_int_rpc);
+	expr jcs:execute($connection,$tx_int_rpc);
+	expr jcs:execute($connection,$rx_warn_int_rpc);
+	expr jcs:execute($connection,$rx_alarm_int_rpc);
+
+}
+

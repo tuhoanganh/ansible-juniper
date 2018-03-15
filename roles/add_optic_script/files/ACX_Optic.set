@@ -1,0 +1,13 @@
+set event-options max-policies 5
+set event-options generate-event 1_hours time-interval 3600
+set event-options policy record-Optic events snmp_trap_link_down
+set event-options policy record-Optic events snmp_trap_link_up
+set event-options policy record-Optic events 1_hours
+set event-options policy record-Optic attributes-match snmp_trap_link_down.interface-name matches "ge-1/1/1|ge-1/1/0"
+set event-options policy record-Optic attributes-match snmp_trap_link_up.interface-name matches "ge-1/1/1|ge-1/1/0"
+set event-options policy record-Optic then event-script Optic.slax
+set event-options policy backup-config-on-commit events 1_hours
+set event-options policy backup-config-on-commit within 3600 events ui_commit_progress
+set event-options policy backup-config-on-commit attributes-match ui_commit_progress.message matches "commit complete"
+set event-options policy backup-config-on-commit then execute-commands commands "request system snapshot slice alternate config-partition"
+set event-options event-script file Optic.slax

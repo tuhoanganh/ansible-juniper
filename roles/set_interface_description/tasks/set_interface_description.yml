@@ -1,13 +1,28 @@
 ---
-- name: INFORMATION - [STEP 01] - Set interfaces description
-  juniper_junos_config:
-    load: "merge"
-    lines: 
-      - "set interfaces {{ item.src_port }} description TO-{{ item.dest_hostname }}---{{ item.dest_sitename }}---{{ item.dest_port }}"
-    host: "{{ ansible_host }}" 
-    user: "{{ juniper_user }}"
-    passwd: "{{ juniper_passwd }}"
-    comment: "Set Interfaces description - by Ansible"
+- name: INFORMATION - [Step 01] - Set directory for storing the temp and configuration files
+  set_fact:
+    default_path: "files/tmp/"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 02] - Create Set Interface Description command
+  shell: "echo 'set interfaces {{ item.src_port }} description TO-{{ item.dest_hostname }}---{{ item.dest_sitename }}---{{ item.dest_port }}' >> {{ default_path }}/{{ inventory_hostname }}.set"
   with_items:
     - "{{ interfaces_description }}"
 
+- name: CONFIGURATION - [Step 03] - Set Interface Description
+  juniper_junos_config:
+    load: 'merge'
+    src: "{{ default_path }}/{{ inventory_hostname }}.set"
+    host: "{{ ansible_host }}"    # variable is from inventory file
+    user: "{{ juniper_user }}"        # variable is from inventory file
+    passwd: "{{ juniper_passwd }}"    # variable is from inventory file
+    commit: true
+    comment: "Set Interface Description - by ansible"
+
+- name: INFORMATION - [Step 04] - Clear Temp file
+  shell:  "{{ item  }}"
+  with_items:
+    - "find {{ default_path }}/*.set -delete"
+  run_once: true
+  delegate_to: localhost
