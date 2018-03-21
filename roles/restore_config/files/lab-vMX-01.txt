@@ -139,7 +139,7 @@ chassis {
 services {
     rpm {
         probe Uplink {
-            test ge-0/0/1 {
+            test ge-1/1/0 {
                 probe-type icmp-ping;
                 target address 10.248.66.30;
                 probe-count 15;
@@ -150,7 +150,7 @@ services {
                 }
                 hardware-timestamp;
             }
-            test ge-0/0/2 {
+            test ge-1/1/1 {
                 probe-type icmp-ping;
                 target address 10.248.66.25;
                 probe-count 15;

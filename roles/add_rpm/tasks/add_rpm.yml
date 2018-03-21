@@ -5,35 +5,46 @@
   run_once: true
   delegate_to: localhost
 
-- name: INFORMATION - [Step 02] - Create Set Interface Description command
-  template:
-    src: "{{ role_path }}/templates/rpm.j2"
-    dest: "{{ default_path }}/{{ inventory_hostname }}.set"
-    backup: yes
+- name: INFORMATION - [Step 02] - Create RPM configuration with default variables
+  shell: "{{ item }}"
+  with_items:
+    - "echo 'set services rpm probe Uplink test ge-1/1/1 probe-type {{ probe_type }}' > {{ default_path }}/default_rpm.tmp"
+    - "echo 'set services rpm probe Uplink test ge-1/1/1 probe-count {{ probe_count }}' >> {{ default_path }}/default_rpm.tmp"
+    - "echo 'set services rpm probe Uplink test ge-1/1/1 probe-interval {{ probe_interval }}' >> {{ default_path }}/default_rpm.tmp"
+    - "echo 'set services rpm probe Uplink test ge-1/1/1 test-interval {{ test_interval }}' >> {{ default_path }}/default_rpm.tmp"
+    - "echo 'set services rpm probe Uplink test ge-1/1/1 thresholds total-loss {{ total_loss }}' >> {{ default_path }}/default_rpm.tmp"
+    - "echo 'set services rpm probe Uplink test ge-1/1/1 {{ hardware_timestamp }}' >> {{ default_path }}/default_rpm.tmp"
+    - "echo 'set services rpm probe Uplink test ge-1/1/0 probe-type {{ probe_type }}' >> {{ default_path }}/default_rpm.tmp"
+    - "echo 'set services rpm probe Uplink test ge-1/1/0 probe-count {{ probe_count }}' >> {{ default_path }}/default_rpm.tmp"
+    - "echo 'set services rpm probe Uplink test ge-1/1/0 probe-interval {{ probe_interval }}' >> {{ default_path }}/default_rpm.tmp"
+    - "echo 'set services rpm probe Uplink test ge-1/1/0 test-interval {{ test_interval }}' >> {{ default_path }}/default_rpm.tmp"
+    - "echo 'set services rpm probe Uplink test ge-1/1/0 thresholds total-loss {{ total_loss }}' >> {{ default_path }}/default_rpm.tmp"
+    - "echo 'set services rpm probe Uplink test ge-1/1/0 {{ hardware_timestamp }}' >> {{ default_path }}/default_rpm.tmp"
+  run_once: true
+  delegate_to: localhost 
+
+- name: INFORMATION - [Step 02] - Create RPM configuration with Source Port and Destination IP
+  shell: "echo 'set services rpm probe Uplink test {{ item.src_port }} target address {{ item.dest_ip }}' >> {{ default_path }}/{{ inventory_hostname }}.set"
   with_items:
     - "{{ interfaces_description }}"
 
-- stat: path="{{ default_path }}/{{ inventory_hostname }}.set.*"
-  register: backup
+- name: INFORMATION - [Step 02] - Generate full configuration for RPM
+  shell: "cat {{ default_path }}/default_rpm.tmp >> {{ default_path }}/{{ inventory_hostname }}.set"
 
-- debug: var=backup.stdout
-
-- name: INFORMATION - [Step 02] - Create Set Interface Description command
-  command: "cat {{ backup }}  >> {{ inventory_hostname }}.set" 
-
-#- name: CONFIGURATION - [Step 03] - Set Interface Description
-#  juniper_junos_config:
-#    load: 'merge'
-#    src: "{{ default_path }}/{{ inventory_hostname }}.set"
-#    host: "{{ ansible_host }}"    # variable is from inventory file
-#    user: "{{ juniper_user }}"        # variable is from inventory file
-#    passwd: "{{ juniper_passwd }}"    # variable is from inventory file
-#    commit: true
-#    comment: "Set Interface Description - by ansible"
+- name: CONFIGURATION - [Step 03] - Push RPM's Confgiuration
+  juniper_junos_config:
+    load: 'merge'
+    src: "{{ default_path }}/{{ inventory_hostname }}.set"
+    host: "{{ ansible_host }}"    # variable is from inventory file
+    user: "{{ juniper_user }}"        # variable is from inventory file
+    passwd: "{{ juniper_passwd }}"    # variable is from inventory file
+    commit: true
+    comment: "Set Interface Description - by ansible"
 
 - name: INFORMATION - [Step 04] - Clear Temp file
   shell:  "{{ item  }}"
   with_items:
-    - "find {{ default_path }}/*.set. -delete"
+    - "find {{ default_path }}/*.set -delete"
+    - "find {{ default_path }}/*.tmp -delete"
   run_once: true
   delegate_to: localhost
