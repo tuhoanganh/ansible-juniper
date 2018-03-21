@@ -4,6 +4,7 @@ lab-vMX-02 ansible_host=10.98.0.108
 lab-vMX-03 ansible_host=10.98.0.109
 
 [all:vars]
+device_type = CSR
 #Variables for connect SSH
 #juniper_user=juniper 
 #juniper_passwd=juniper@123 

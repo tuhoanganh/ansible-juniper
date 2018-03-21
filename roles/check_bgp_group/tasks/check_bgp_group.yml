@@ -16,7 +16,6 @@
     state: touch
     mode: "u=rw,g=rw,o=rw"
 
-
 - name: INFORMATION - [Step 04] - Create report file
   file:
     path: "{{ default_path }}/CSR_bgp_group_{{ date_info }}.csv"
@@ -24,6 +23,8 @@
     mode: "u=rw,g=rw,o=rw"
   run_once: true
   delegate_to: localhost
+  when:
+    - device_type == "CSR"
 
 - name: INFORMATION - [Step 05] - Create column name in file
   lineinfile:
@@ -31,12 +32,16 @@
     line: "Hostname, IP, BGP Group, Value"
   run_once: true
   delegate_to: localhost
+  when:
+    - device_type == "CSR"
 
 - name: INFORMATION - [Step 06] - Write device informations into temporary file
   lineinfile:
     dest: "{{ default_path }}/{{ inventory_hostname }}.tmp"
     line: "{{ inventory_hostname }},{{ ansible_host }}"
     state: present
+  when:
+    - device_type == "CSR"
 
 - name: INFORMATION - [STEP 07] - Get configuration with display set
   juniper_junos_command:
@@ -56,6 +61,8 @@
     - "cat {{ default_path }}/{{ inventory_hostname }}.group.tmp | tr '\n' ',' | tr ' ' ',' >> {{ default_path }}/{{ inventory_hostname }}.tmp"
     - "echo '\n' >> {{ default_path }}/{{ inventory_hostname }}.tmp"
     - "cat {{ default_path }}/{{ inventory_hostname }}.tmp >> {{ default_path }}/CSR_bgp_group_{{ date_info }}.csv"
+  when:
+    - device_type == "CSR"
 
 - name: INFORMATION - [Step 09] - Collect all Devices's bgp group information and store into csv file
   shell: "{{ item }}"
@@ -64,6 +71,8 @@
     - 'sed -i "/^$/d" {{ default_path }}/CSR_bgp_group_{{ date_info }}.csv'
   run_once: true
   delegate_to: localhost
+  when:
+    - device_type == "CSR"
 
 - name: INFORMATION - [Step 10] - Clear Temp file
   shell:  "find {{ default_path }}/*.tmp -delete"
