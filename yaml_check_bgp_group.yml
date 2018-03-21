@@ -1,0 +1,34 @@
+---
+- hosts: all
+  gather_facts: no
+  serial: 100
+  connection: local
+  vars_prompt:
+    - name: juniper_user
+      prompt: User
+      private: no
+    - name: juniper_passwd
+      prompt: Password
+      private: yes
+
+  pre_tasks:
+    - name: "VARIABLES - Set variable for Class of Service name"
+      set_fact: bgp_group_1="AGG-TO-MC"
+      run_once: true
+      delegate_to: localhost
+
+    - name: "VARIABLES - Set variable for Class of Service name"
+      set_fact: bgp_group_2="AGG-TO-CSR-LEFT"
+      run_once: true
+      delegate_to: localhost
+
+    - name: "VARIABLES - Set variable for Class of Service name"
+      set_fact: bgp_group_3="AGG-TO-CSR-RIGHT"
+      run_once: true
+      delegate_to: localhost
+
+  roles:
+    - role: Juniper.junos
+    - role: ansible_log_rotato
+    - role: check_netconf
+    - role: check_bgp_group

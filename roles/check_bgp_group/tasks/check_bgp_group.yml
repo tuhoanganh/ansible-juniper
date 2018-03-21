@@ -1,0 +1,71 @@
+---
+- name: INFORMATION - [Step 01] - Get Date
+  set_fact: date_info="{{lookup('pipe','date +%Y%m%d')}}"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 02] - Set directory for storing the temp and configuration files
+  set_fact:
+    default_path: "files/tmp"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 03] - Create Temporary file
+  file:
+    path: "{{ default_path }}/{{ inventory_hostname }}.tmp"
+    state: touch
+    mode: "u=rw,g=rw,o=rw"
+
+
+- name: INFORMATION - [Step 04] - Create report file
+  file:
+    path: "{{ default_path }}/CSR_bgp_group_{{ date_info }}.csv"
+    state: touch
+    mode: "u=rw,g=rw,o=rw"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 05] - Create column name in file
+  lineinfile:
+    dest: "{{ default_path }}/CSR_bgp_group_{{ date_info }}.csv"
+    line: "Hostname, IP, BGP Group, Value"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 06] - Write device informations into temporary file
+  lineinfile:
+    dest: "{{ default_path }}/{{ inventory_hostname }}.tmp"
+    line: "{{ inventory_hostname }},{{ ansible_host }}"
+    state: present
+
+- name: INFORMATION - [STEP 07] - Get configuration with display set
+  juniper_junos_command:
+    cli: "show configuration | display set"
+    dest: "{{ default_path }}/{{ inventory_hostname }}.config.tmp"
+    format: text
+    host: "{{ ansible_host }}" 
+    user: "{{ juniper_user }}"
+    passwd: "{{ juniper_passwd }}"
+
+- name: INFORMATION - [STEP 08] - Filter BGP's information
+  shell: "{{ item }}"
+  with_items:
+    - "cat {{ default_path }}/{{ inventory_hostname }}.tmp > {{ default_path }}/{{ inventory_hostname }}.group.tmp"
+    - "cat {{ default_path }}/{{ inventory_hostname }}.config.tmp | grep 'bgp group' | grep 'minimum-interval' | awk '{print $5,$NF}' >> {{ default_path }}/{{ inventory_hostname }}.group.tmp"
+    - "cat /dev/null > {{ default_path }}/{{ inventory_hostname }}.tmp"
+    - "cat {{ default_path }}/{{ inventory_hostname }}.group.tmp | tr '\n' ',' | tr ' ' ',' >> {{ default_path }}/{{ inventory_hostname }}.tmp"
+    - "echo '\n' >> {{ default_path }}/{{ inventory_hostname }}.tmp"
+    - "cat {{ default_path }}/{{ inventory_hostname }}.tmp >> {{ default_path }}/CSR_bgp_group_{{ date_info }}.csv"
+
+- name: INFORMATION - [Step 09] - Collect all Devices's bgp group information and store into csv file
+  shell: "{{ item }}"
+  with_items:
+    - "cat {{ default_path }}/{{ inventory_hostname }}.tmp >> {{ default_path }}/CSR_bgp_group_{{ date_info }}.csv"
+    - 'sed -i "/^$/d" {{ default_path }}/CSR_bgp_group_{{ date_info }}.csv'
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 10] - Clear Temp file
+  shell:  "find {{ default_path }}/*.tmp -delete"
+  run_once: true
+  delegate_to: localhost

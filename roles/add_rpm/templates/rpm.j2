@@ -1,0 +1,7 @@
+set services rpm probe Uplink test {{ item.src_port }} probe-type {{ probe_type }}
+set services rpm probe Uplink test {{ item.src_port }} target address {{ item.dest_ip }}
+set services rpm probe Uplink test {{ item.src_port }} probe-count {{ probe_count }}
+set services rpm probe Uplink test {{ item.src_port }} probe-interval {{ probe_interval }}
+set services rpm probe Uplink test {{ item.src_port }} test-interval {{ test_interval }}
+set services rpm probe Uplink test {{ item.src_port }} thresholds total-loss {{ total_loss }}
+set services rpm probe Uplink test {{ item.src_port }} hardware-timestamp {{ hardware_timestamp }}
