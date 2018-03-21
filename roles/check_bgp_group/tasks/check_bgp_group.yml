@@ -26,6 +26,16 @@
   when:
     - device_type == "CSR"
 
+- name: INFORMATION - [Step 04] - Create report file
+  file:
+    path: "{{ default_path }}/AGG_bgp_group_{{ date_info }}.csv"
+    state: touch
+    mode: "u=rw,g=rw,o=rw"
+  run_once: true
+  delegate_to: localhost
+  when:
+    - device_type == "AGG"
+
 - name: INFORMATION - [Step 05] - Create column name in file
   lineinfile:
     dest: "{{ default_path }}/CSR_bgp_group_{{ date_info }}.csv"
@@ -35,13 +45,20 @@
   when:
     - device_type == "CSR"
 
+- name: INFORMATION - [Step 05] - Create column name in file
+  lineinfile:
+    dest: "{{ default_path }}/AGG_bgp_group_{{ date_info }}.csv"
+    line: "Hostname, IP, AGG-TO-MC, AGG-TO-CSR-LEFT, AGG-TO-CSR-RIGHT"
+  run_once: true
+  delegate_to: localhost
+  when:
+    - device_type == "AGG"
+
 - name: INFORMATION - [Step 06] - Write device informations into temporary file
   lineinfile:
     dest: "{{ default_path }}/{{ inventory_hostname }}.tmp"
     line: "{{ inventory_hostname }},{{ ansible_host }}"
     state: present
-  when:
-    - device_type == "CSR"
 
 - name: INFORMATION - [STEP 07] - Get configuration with display set
   juniper_junos_command:
@@ -64,15 +81,35 @@
   when:
     - device_type == "CSR"
 
+- name: INFORMATION - [STEP 08] - Filter BGP's information
+  shell: "{{ item }}"
+  with_items:
+    - "cat {{ default_path }}/{{ inventory_hostname }}.tmp > {{ default_path }}/{{ inventory_hostname }}.group.tmp"
+    - "cat {{ default_path }}/{{ inventory_hostname }}.config.tmp | grep 'bgp group' | grep 'minimum-interval' | awk '{print $NF}' >> {{ default_path }}/{{ inventory_hostname }}.group.tmp"
+    - "cat /dev/null > {{ default_path }}/{{ inventory_hostname }}.tmp"
+    - "cat {{ default_path }}/{{ inventory_hostname }}.group.tmp | tr '\n' ',' | tr ' ' ',' >> {{ default_path }}/{{ inventory_hostname }}.tmp"
+    - "echo '\n' >> {{ default_path }}/{{ inventory_hostname }}.tmp"
+    - "cat {{ default_path }}/{{ inventory_hostname }}.tmp >> {{ default_path }}/AGG_bgp_group_{{ date_info }}.csv"
+  when:
+    - device_type == "AGG"
+
 - name: INFORMATION - [Step 09] - Collect all Devices's bgp group information and store into csv file
   shell: "{{ item }}"
   with_items:
-    - "cat {{ default_path }}/{{ inventory_hostname }}.tmp >> {{ default_path }}/CSR_bgp_group_{{ date_info }}.csv"
     - 'sed -i "/^$/d" {{ default_path }}/CSR_bgp_group_{{ date_info }}.csv'
   run_once: true
   delegate_to: localhost
   when:
     - device_type == "CSR"
+
+- name: INFORMATION - [Step 09] - Collect all Devices's bgp group information and store into csv file
+  shell: "{{ item }}"
+  with_items:
+    - 'sed -i "/^$/d" {{ default_path }}/AGG_bgp_group_{{ date_info }}.csv'
+  run_once: true
+  delegate_to: localhost
+  when:
+    - device_type == "AGG"
 
 - name: INFORMATION - [Step 10] - Clear Temp file
   shell:  "find {{ default_path }}/*.tmp -delete"
