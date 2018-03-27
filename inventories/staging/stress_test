@@ -1,0 +1,54 @@
+[juniper]
+lab1 ansible_host=10.96.10.37
+lab2 ansible_host=10.96.10.37
+lab3 ansible_host=10.96.10.37
+lab4 ansible_host=10.96.10.37
+lab5 ansible_host=10.96.10.37
+lab6 ansible_host=10.96.10.37
+lab7 ansible_host=10.96.10.37
+lab8 ansible_host=10.96.10.37
+lab9 ansible_host=10.96.10.37
+lab10 ansible_host=10.96.10.37
+lab11 ansible_host=10.96.10.37
+lab12 ansible_host=10.96.10.37
+lab13 ansible_host=10.96.10.37
+lab14 ansible_host=10.96.10.37
+lab15 ansible_host=10.96.10.37
+lab16 ansible_host=10.96.10.37
+lab17 ansible_host=10.96.10.37
+lab18 ansible_host=10.96.10.37
+lab19 ansible_host=10.96.10.37
+lab20 ansible_host=10.96.10.37
+lab21 ansible_host=10.96.10.37
+lab22 ansible_host=10.96.10.37
+lab23 ansible_host=10.96.10.37
+lab24 ansible_host=10.96.10.37
+lab25 ansible_host=10.96.10.37
+lab26 ansible_host=10.96.10.37
+lab27 ansible_host=10.96.10.37
+lab28 ansible_host=10.96.10.37
+lab29 ansible_host=10.96.10.37
+lab30 ansible_host=10.96.10.37
+lab31 ansible_host=10.96.10.37
+lab32 ansible_host=10.96.10.37
+lab33 ansible_host=10.96.10.37
+lab34 ansible_host=10.96.10.37
+lab35 ansible_host=10.96.10.37
+lab36 ansible_host=10.96.10.37
+lab37 ansible_host=10.96.10.37
+lab38 ansible_host=10.96.10.37
+lab39 ansible_host=10.96.10.37
+lab40 ansible_host=10.96.10.37
+lab41 ansible_host=10.96.10.37
+lab42 ansible_host=10.96.10.37
+lab43 ansible_host=10.96.10.37
+
+[all:vars]
+device_type = AGG
+#Variables for connect SSH
+#juniper_user=juniper 
+#juniper_passwd=juniper@123 
+ansible_connection=local
+ansible_user = root
+ansible_pass = ABCD1234
+ansible_port = 22

@@ -1,0 +1,15 @@
+---
+- name: STESST TEST - [Step 01] Push CLI
+  juniper_junos_command:
+    commands:
+      - show subscriber user-name user01
+      - show subscriber user-name user01
+      - show subscriber user-name user01
+      - show subscriber user-name user01
+      - show subscriber user-name user01
+      - show subscriber user-name user01
+      - show subscriber user-name user01
+      - show subscriber user-name user01
+    host: "{{ ansible_host }}"
+    user: "{{ juniper_user }}"
+    passwd: "{{ juniper_passwd }}"
