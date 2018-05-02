@@ -1,0 +1,3 @@
+---
+# tasks file for juniper_test
+- include_tasks: inventory_init.yml

@@ -12,6 +12,11 @@
       private: yes
 
   pre_tasks:
+    - name: "[VARIABLES] - Set variable for Ansible's log prefix"
+      set_fact: log_prefix="check_cos"
+      run_once: true
+      delegate_to: localhost
+
     - name: "VARIABLES - Set variable for Class of Service name"
       set_fact: class_of_service_name="RW_EXP"
       run_once: true

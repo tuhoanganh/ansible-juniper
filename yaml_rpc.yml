@@ -1,0 +1,40 @@
+---
+- hosts: all
+  gather_facts: false
+  connection: local
+  vars_prompt:
+    - name: juniper_user
+      prompt: User
+      private: no
+    - name: juniper_passwd
+      prompt: Password
+      private: yes
+
+  pre_tasks:
+    - name: "[VARIABLES] - Set variable for Ansible's log prefix"
+      set_fact: log_prefix="rpc"
+      run_once: true
+      delegate_to: localhost
+
+  roles:
+#    - role: ansible_log_rotato
+    - role: Juniper.junos
+
+  tasks:
+    - name: Get version information
+      juniper_junos_rpc:
+        rpcs: "get-interface-information"
+        host: "{{ ansible_host }}"
+        user: "{{ juniper_user }}"
+        kwargs: 
+          - interface_name: "pfe-0/0/0"
+        passwd: "{{ juniper_passwd }}"
+        format: xml
+      register: interface
+
+    - name: Dislay interface information
+      debug: var=interface.stdout_lines
+
+
+
+      

@@ -12,6 +12,11 @@
       private: yes
 
   pre_tasks:
+    - name: "[VARIABLES] - Set variable for Ansible's log prefix"
+      set_fact: log_prefix="check_bgp_group"
+      run_once: true
+      delegate_to: localhost
+
     - name: "VARIABLES - Set variable for Class of Service name"
       set_fact: bgp_group_1="AGG-TO-MC"
       run_once: true

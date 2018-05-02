@@ -1,10 +1,21 @@
 ---
-- hosts: all
-  serial: 50
-  gather_facts: no
+- hosts: 127.0.0.1
+  gather_facts: false
   connection: local
   roles:
-    - role: Juniper.junos
+    - role: inventory_init
+
+- hosts: all
+  serial: 50
+  gather_facts: false
+  connection: local
+  roles:
     - role: ansible_log_rotato
     - role: check_netconf
     - role: backup_config
+
+- hosts: 127.0.0.1
+  gather_facts: false
+  connection: local
+  roles:
+    - role: git_commit

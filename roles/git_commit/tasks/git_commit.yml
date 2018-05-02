@@ -1,0 +1,15 @@
+
+- name: INFOMRATION - [Step 01] - Set directory for storing the files
+  set_fact:
+    backup_path: "files/backup_config/"
+  run_once: true
+  delegate_to: localhost'
+  
+  
+- name: INFORMATION - [Step 02] - commit git changes
+  shell: cd {{ backup_path }} && git add -A && git commit -a -m "update config on {{date_info}}"
+#  ignore_errors: true
+  run_once: true
+  delegate_to: localhost
+  
+  

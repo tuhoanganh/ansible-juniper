@@ -1,0 +1,52 @@
+---
+- name: INFORMATION - [Step 01] - Get Date
+  set_fact: date_info="{{lookup('pipe','date +%Y%m%d')}}"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 02] - Set directory for storing the log files
+  set_fact:
+    default_path: "files/get_serial"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 03] - Create report file
+  file:
+    path: "{{ default_path }}/get_serial_{{ date_info }}.txt"
+    state: touch
+    mode: "u=rw,g=rw,o=rw"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 04] - Create Temporary file
+  file:
+    path: "{{ default_path }}/{{ inventory_hostname }}.tmp"
+    state: touch
+    mode: "u=rw,g=rw,o=rw"
+  
+- name: INFORMATION - [Step 05] - Get Chasis hadware's information
+  junos_cli:
+    host: "{{ ansible_host }}"
+    user: "{{ juniper_user }}"
+    passwd: "{{ juniper_passwd }}"
+    cli: "show chasis hadrware"
+    dest: "{{ default_path }}/{{ inventory_hostname }}.tmp"
+    format: text
+
+- name: INFORMATION - [Step 08] - Filter Serial number
+  shell: "{{ item }}"
+  with_items:
+     - "cat {{ default_path }}/{{ inventory_hostname }}.tmp | grep 'xcvr' >> {{ default_path }}/{{ inventory_hostname }}_serial.tmp"
+
+- name: INFORMATION - [Step 09] - Collect all Serial number  and store into txt file
+  shell: "{{ item }}"
+  with_items:
+     - "cat {{ default_path }}/*_serial.tmp >> {{ default_path }}/get_serial_{{ date_info }}.txt"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 09] - Clear Temp file
+  shell:  "find {{ default_path }}/*.tmp -delete"
+  run_once: true
+  delegate_to: localhost
+

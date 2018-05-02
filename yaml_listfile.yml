@@ -9,7 +9,15 @@
     - name: juniper_passwd
       prompt: Password
       private: yes
+
+  pre_tasks:
+    - name: "[VARIABLES] - Set variable for Ansible's log prefix"
+      set_fact: log_prefix="list_file"
+      run_once: true
+      delegate_to: localhost
+
   roles:
+    - role: Juniper.junos
     - role: ansible_log_rotato
     - role: check_netconf
     - role: list_file

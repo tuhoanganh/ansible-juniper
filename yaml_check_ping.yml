@@ -3,6 +3,12 @@
   hosts: all
   connection: local
   gather_facts: no
+  pre_tasks:
+    - name: "[VARIABLES] - Set variable for Ansible's log prefix"
+      set_fact: log_prefix="ping"
+      run_once: true
+      delegate_to: localhost
+
   roles:
     - Juniper.junos
     - role: ansible_log_rotato

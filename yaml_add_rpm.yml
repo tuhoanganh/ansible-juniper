@@ -12,6 +12,11 @@
       private: yes
 
   pre_tasks:
+    - name: "[VARIABLES] - Set variable for Ansible's log prefix"
+      set_fact: log_prefix="add_rpm"
+      run_once: true
+      delegate_to: localhost
+
     - name: "VARIABLES - [STEP 01] - Set variable for RPM: probe-type"
       set_fact: probe_type="icmp-ping"
       run_once: true

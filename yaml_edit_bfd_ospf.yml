@@ -12,6 +12,11 @@
       private: yes
 
   pre_tasks:
+    - name: "[VARIABLES] - Set variable for Ansible's log prefix"
+      set_fact: log_prefix="edit_bfd_ospf"
+      run_once: true
+      delegate_to: localhost
+
     - name: "VARIABLES - Set Old minimum-interval value"
       set_fact: old_interval="500"
       run_once: true

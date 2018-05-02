@@ -1,0 +1,20 @@
+---
+- name: INFORMATION - [Step 01] - Get Date
+  set_fact: date_info="{{lookup('pipe','date +%Y%m%d')}}"
+  run_once: true
+  delegate_to: localhost
+ 
+- name: INFORMATION - [Step 02] - Set directory for storing the files
+  set_fact:
+    backup_path: "files/backup_config"
+  run_once: true
+  delegate_to: localhost
+
+- name: INFORMATION - [Step 03] - Create  directory
+  file: 
+    path: "{{ backup_path }}"
+    state: directory
+    mode: 0777
+  run_once: true
+  delegate_to: localhost
+
