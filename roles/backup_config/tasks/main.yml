@@ -1,4 +1,3 @@
 ---
 # tasks file for juniper_test
-- include: backup_config.yml
-
+- include_tasks: backup_config.yml
